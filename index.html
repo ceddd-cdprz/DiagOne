@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="icon-256.png"><meta name="description" content="DiagOne - free hardware and browser diagnostic suite: display, audio, keyboard, network speed tests and more.">
+<title>DiagOne — Hardware Diagnostic Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{--bg:#000;--fg:#fff;--dim:#777;--line:#333;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#fff;--fg:#000;--dim:#888;--line:#ccc}}
+:root[data-theme="light"]{--bg:#fff;--fg:#000;--dim:#888;--line:#ccc}
+:root[data-theme="dark"]{--bg:#000;--fg:#fff;--dim:#777;--line:#333}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 13px/1.5 'Roboto Mono','RobotoMonoLocal',ui-monospace,Menlo,Consolas,monospace}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+h1{font-size:14px;font-weight:700;letter-spacing:.2em;margin:0}
+nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--line)}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--fg);padding:8px 14px;cursor:pointer;text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+button:hover,button.on{background:var(--fg);color:var(--bg)}
+nav button{border:0;border-right:1px solid var(--line);padding:14px 20px;white-space:nowrap}
+main{max-width:980px;margin:0 auto;padding:24px 20px}
+section{display:none}section.on{display:block}
+h2{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin:28px 0 10px;color:var(--dim)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.stat{background:var(--bg);padding:12px}.stat b{display:block;font-size:20px;font-weight:300}.stat span{color:var(--dim);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.kb{overflow-x:auto;padding-bottom:6px}
+.krow{display:flex;gap:4px;margin-bottom:4px;min-width:760px}
+.k{flex:var(--w,1) 1 0;height:40px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--dim)}
+.k.t{border-color:var(--fg);color:var(--fg)}.k.d{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.pad{border:1px dashed var(--fg);height:220px;display:flex;align-items:center;justify-content:center;color:var(--dim);user-select:none;touch-action:none;text-align:center}
+.mb{display:flex;gap:6px}.mb div{flex:1;border:1px solid var(--line);padding:14px 4px;text-align:center;color:var(--dim)}.mb div.d{background:var(--fg);color:var(--bg)}
+.led{display:flex;gap:8px}.led div{width:56px;height:56px;border:1px solid var(--fg);display:flex;align-items:center;justify-content:center;font-weight:700}.led div.d{background:var(--fg);color:var(--bg)}
+input[type=range]{width:100%;max-width:420px;accent-color:var(--fg)}
+canvas{width:100%;height:160px;border:1px solid var(--line);display:block}
+#fs{position:fixed;inset:0;z-index:9;display:none;cursor:pointer}
+#fs small{position:absolute;left:12px;bottom:12px;mix-blend-mode:difference;color:#fff}
+.warn{visibility:hidden;font-weight:700}.warn.on{visibility:visible}
+p{color:var(--dim);margin:4px 0 8px}
+
+.tbox{border:1px solid var(--line);padding:16px;height:150px;overflow:hidden;position:relative;font-size:18px;line-height:1.9;white-space:pre-wrap;word-break:break-word}
+.c{color:var(--dim)}.c.ok{color:var(--fg)}.c.bad{background:var(--fg);color:var(--bg)}.c.cur{border-bottom:2px solid var(--fg)}
+#tRes{font-weight:700;margin-top:10px}
+
+footer{border-top:1px solid var(--line);text-align:center;color:var(--dim);padding:18px;font-size:11px;letter-spacing:.2em;margin-top:40px}
+table.kv{width:100%;border-collapse:collapse;font-size:12px}.kv td,.kv th{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top;word-break:break-word}.kv td:first-child{color:var(--dim);width:200px}.kv th{font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:10px}
+.dr td:first-child{color:var(--fg);width:auto}
+input[type=text]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--fg);padding:8px 10px;min-width:220px}
+
+::selection{background:var(--fg);color:var(--bg)}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--line)}::-webkit-scrollbar-thumb:hover{background:var(--dim)}
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:22px 22px}
+header{padding:20px 24px}h1{font-size:18px;letter-spacing:.35em}header small{display:block;color:var(--dim);font-size:9px;letter-spacing:.35em;margin-top:2px}
+.cur{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+#clock{color:var(--dim);font-size:12px;letter-spacing:.15em;margin-right:10px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+nav button{font-size:10px;letter-spacing:.18em;transition:background .2s,color .2s}
+nav button.on{box-shadow:inset 0 -3px 0 var(--dim)}
+button{transition:background .18s,color .18s,transform .1s,opacity .2s}button:active{transform:scale(.96)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--fg);outline-offset:2px}button:disabled{opacity:.35;cursor:wait;pointer-events:none}
+.pri{background:var(--fg);color:var(--bg);font-weight:700;padding:10px 20px}.pri:hover{background:var(--bg);color:var(--fg)}
+section.on{animation:secin .4s cubic-bezier(.2,.8,.2,1)}@keyframes secin{from{opacity:0;transform:translateY(10px)}}
+h2::before{content:'/ ';color:var(--fg)}h2{margin-top:34px}
+.stat{transition:background .2s,color .2s}.stat:hover{background:var(--fg);color:var(--bg)}.stat:hover span{color:var(--bg);opacity:.7}
+.stat b{font-size:24px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.k{height:44px;transition:background .35s,color .35s,transform .35s}.k.d{transition:none;transform:scale(.93)}
+.pad,.tbox{transition:border-color .2s,background .2s}.pad:hover{background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.tbox{font-size:20px}.c.cur{animation:blink 1s steps(1) infinite}
+.empty{border:1px dashed var(--line);padding:56px 20px;text-align:center;color:var(--dim);letter-spacing:.25em;font-size:12px;margin-top:12px}.empty small{font-size:10px;letter-spacing:.2em}
+footer{letter-spacing:.3em;padding:24px}footer::before{content:'';display:inline-block;width:6px;height:6px;background:var(--fg);margin-right:12px;vertical-align:middle;animation:blink 1.6s steps(1) infinite}
+#topbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:30;pointer-events:none}#topbar i{display:block;height:100%;width:0;background:var(--fg);transition:width .15s linear}
+.ld{position:relative;border:1px solid var(--fg);padding:28px;overflow:hidden;margin-top:12px}
+.ld::before{content:'';position:absolute;left:0;right:0;height:2px;background:var(--fg);opacity:.45;animation:sweep 1.5s linear infinite}@keyframes sweep{from{top:-4px}to{top:100%}}
+.ld-top{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.25em;font-weight:700}
+.ld-pct{font-size:clamp(56px,15vw,120px);font-weight:700;line-height:1;margin:16px 0;letter-spacing:-.05em;font-variant-numeric:tabular-nums;animation:flick 2.2s infinite}
+@keyframes flick{0%,90%,100%{opacity:1}92%{opacity:.35}94%{opacity:1}97%{opacity:.6}}
+.ld-bar{position:relative;height:24px;border:1px solid var(--fg)}
+.ld-bar i{display:block;height:100%;width:0;background:var(--fg);position:relative;overflow:hidden}
+.ld-bar i::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--bg) 65%,transparent),transparent);transform:translateX(-100%);animation:shim .9s linear infinite}@keyframes shim{to{transform:translateX(100%)}}
+.ld-bar::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 12px,var(--bg) 12px 15px)}
+.ld-log{margin-top:18px;font-size:11px;color:var(--dim);min-height:120px;line-height:1.75}.ld-log div:last-child{color:var(--fg)}.ld-log div:last-child::after{content:'█';margin-left:6px;animation:blink .8s steps(1) infinite}
+.ld.done{animation:flash .7s ease-out}.ld.done .ld-pct{animation:none}@keyframes flash{0%{background:var(--fg);color:var(--bg)}100%{background:var(--bg);color:var(--fg)}}
+.rev .kv tr,.rev h2{animation:rowin .45s both;animation-delay:calc(var(--i,0)*24ms)}@keyframes rowin{from{opacity:0;transform:translateX(-12px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:root{--lgs:url("data:image/png;base64,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");--lgw:url("data:image/png;base64,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")}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.brand{display:flex;align-items:center;gap:16px}
+.lgs,.lgw{display:block;background:var(--fg)}
+.lgs{width:40px;height:44px;-webkit-mask:var(--lgs) center/contain no-repeat;mask:var(--lgs) center/contain no-repeat}
+.lgw{width:91px;height:15px;margin-bottom:6px;-webkit-mask:var(--lgw) center/contain no-repeat;mask:var(--lgw) center/contain no-repeat}
+.ld::after{content:'';position:absolute;right:-20px;bottom:-20px;width:240px;height:240px;background:var(--fg);opacity:.07;pointer-events:none;-webkit-mask:var(--lgs) center/contain no-repeat;mask:var(--lgs) center/contain no-repeat}
+.empty::before{content:'';display:block;width:56px;height:56px;margin:0 auto 18px;background:var(--fg);opacity:.25;-webkit-mask:var(--lgs) center/contain no-repeat;mask:var(--lgs) center/contain no-repeat}
+#boot{position:fixed;inset:0;z-index:100;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden;transition:opacity .4s,transform .4s,filter .4s}
+#boot.out{opacity:0;transform:scale(1.12);filter:blur(6px);pointer-events:none}
+#boot::before{content:'';position:absolute;inset:0;background-image:radial-gradient(#262626 1px,transparent 1px);background-size:22px 22px}
+.bt-ring{position:absolute;width:240px;height:240px;border:1px solid #fff;border-radius:50%;opacity:0;animation:btring 2.6s ease-out infinite;top:calc(50% - 190px)}.bt-ring:nth-child(2){animation-delay:.87s}.bt-ring:nth-child(3){animation-delay:1.74s}
+@keyframes btring{from{transform:scale(.3);opacity:.55}to{transform:scale(2.6);opacity:0}}
+.bt-lw{position:relative;width:128px;height:142px;margin-top:-60px}
+.bt-lw::after{content:'';position:absolute;left:-14px;right:-14px;height:2px;background:#fff;box-shadow:0 0 14px 2px #fff;animation:btscan 1.3s cubic-bezier(.7,0,.2,1) both}@keyframes btscan{from{top:0;opacity:1}to{top:100%;opacity:0}}
+.bt-logo{width:100%;height:100%;background:#fff;-webkit-mask:var(--lgs) center/contain no-repeat;mask:var(--lgs) center/contain no-repeat;animation:btreveal 1.3s cubic-bezier(.7,0,.2,1) both,btglitch 3.4s 1.5s steps(1) infinite}
+@keyframes btreveal{from{clip-path:inset(0 0 100% 0);filter:brightness(5)}to{clip-path:inset(0);filter:brightness(1)}}
+@keyframes btglitch{0%,88%,100%{transform:none}90%{transform:translate(-5px,0) skewX(8deg)}92%{transform:translate(6px,0)}94%{transform:none}96%{transform:translate(-2px,0) skewX(-4deg)}}
+#boot.ready .bt-lw{animation:btpulse .55s}@keyframes btpulse{50%{transform:scale(1.1);filter:drop-shadow(0 0 26px #fff)}}
+.bt-word{display:block;width:200px;height:33px;margin-top:28px;background:#fff;-webkit-mask:var(--lgw) center/contain no-repeat;mask:var(--lgw) center/contain no-repeat;animation:btin 1s 1s both}
+.bt-sub{font-size:9px;letter-spacing:.4em;color:#777;margin-top:12px;animation:btin 1s 1.4s both;text-align:center}
+@keyframes btin{from{opacity:0;filter:blur(10px);transform:translateY(8px)}to{opacity:1;filter:none;transform:none}}
+.bt-load{position:absolute;left:24px;right:24px;bottom:calc(34px + env(safe-area-inset-bottom,0px));max-width:420px;margin:0 auto}
+.bt-top{font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-bottom:10px;font-variant-numeric:tabular-nums}.bt-top span+span{font-size:16px;margin-left:2px}
+.bt-bar{position:relative;height:14px;border:1px solid #fff}.bt-bar i{display:block;height:100%;width:0;background:#fff}.bt-bar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 10px,#000 10px 13px)}
+.bt-log{font-size:10px;color:#777;margin-top:10px;min-height:48px;line-height:1.7}.bt-log div:last-child{color:#fff}.bt-log div:last-child::after{content:'█';margin-left:5px;animation:blink .8s steps(1) infinite}
+.bt-skip{font-size:8px;letter-spacing:.3em;color:#555;margin-top:8px;animation:btin 1s 1.2s both}
+
+select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--fg);padding:8px 10px;font-size:11px;letter-spacing:.06em}
+#lang{padding:6px 8px;margin-right:6px}
+.g{height:110px}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);margin-bottom:-1px}.hrow small{display:block;color:var(--dim);font-size:11px;letter-spacing:0}.hrow>b{font-size:16px}
+.hist{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);margin-bottom:-1px}.hist input{accent-color:var(--fg)}.hist span{flex:1}.hist small{display:block;color:var(--dim);font-size:10px;letter-spacing:0}
+.dk{border:1px solid var(--line);padding:16px;margin-top:12px}.dk h3{margin:0 0 10px;font-size:13px;letter-spacing:.1em}
+.bar{height:16px;border:1px solid var(--fg);margin:6px 0}.bar i{display:block;height:100%;background:var(--fg)}
+.verdict{border:1px solid var(--fg);padding:12px;margin:12px 0;font-size:12px;letter-spacing:.08em;font-weight:700}
+.chg td{font-weight:700}.same td{color:var(--dim)}
+
+html,body{height:100%}
+#app{display:flex;min-height:100vh}
+#side{position:sticky;top:0;align-self:flex-start;height:100vh;width:262px;flex:none;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--bg);z-index:6;transition:width .25s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+#side .brand{padding:22px 20px 14px;gap:12px}#side .lgs{width:34px;height:38px}#side .lgw{width:84px;height:14px;margin-bottom:4px}
+.sq{display:flex;align-items:center;gap:8px;margin:6px 14px 8px;border:1px solid var(--line);padding:0 10px;transition:border-color .2s;cursor:text}.sq:focus-within{border-color:var(--fg)}.sq svg{width:14px;height:14px;flex:none;color:var(--dim)}
+.sq input{border:0;margin:0;background:none;padding:10px 0;min-width:0;width:100%;outline:none;font-size:12px;letter-spacing:.04em;color:var(--fg);font-family:inherit}
+kbd{font:inherit;font-size:9px;color:var(--dim);border:1px solid var(--line);padding:1px 5px;white-space:nowrap}
+#shell{flex:1;min-width:0;display:flex;flex-direction:column}
+#nav{display:block;flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 10px 10px;position:static;border:0;background:none;z-index:auto}
+.ng{font-size:9px;letter-spacing:.28em;color:var(--dim);padding:18px 12px 6px;text-transform:uppercase}
+#nav button.ni{display:flex;align-items:center;gap:12px;width:100%;border:0;padding:10px 12px;font-size:12px;letter-spacing:.05em;text-transform:none;text-align:left;box-shadow:none;white-space:nowrap}
+.ni svg{width:17px;height:17px;flex:none}
+#nav button.ni:hover:not(.on){background:color-mix(in srgb,var(--fg) 9%,transparent)}
+#nav button.ni.on{background:var(--fg);color:var(--bg);font-weight:700;box-shadow:none}
+.ni .dotl{margin-left:auto;width:6px;height:6px;background:currentColor;display:none;animation:blink 1.2s steps(1) infinite}.ni.live .dotl{display:block}
+.sf{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-top:1px solid var(--line)}.sf button{padding:4px 10px;font-size:14px}.sf small{margin:0}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:16px 32px}
+#pgTitle{font-size:18px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}#crumb{letter-spacing:.3em;margin:0 0 2px}
+main{max-width:1180px;width:100%;margin:0 auto;padding:24px 32px 8px;flex:1}
+#pgDesc{color:var(--dim);margin:0 0 20px;max-width:720px}
+.hero{border:1px solid var(--fg);padding:30px;position:relative;overflow:hidden;margin-bottom:26px}
+.hero::after{content:'';position:absolute;right:-24px;bottom:-24px;width:260px;height:290px;background:var(--fg);opacity:.06;pointer-events:none;-webkit-mask:var(--lgs) center/contain no-repeat;mask:var(--lgs) center/contain no-repeat}
+.hero h3{margin:0 0 8px;font-size:22px;letter-spacing:.2em}.hero p{max-width:560px;margin:0 0 18px;color:var(--dim)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.card{background:var(--bg);padding:18px;text-align:left;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-transform:none;letter-spacing:0;display:flex;flex-direction:column;gap:8px;min-height:128px;transition:background .18s,color .18s}
+.card svg{width:22px;height:22px}.card b{font-size:12px;letter-spacing:.14em;text-transform:uppercase}.card em{font-style:normal;color:var(--dim);font-size:11px;line-height:1.55;flex:1}
+.card:hover{background:var(--fg);color:var(--bg)}.card:hover em{color:var(--bg);opacity:.7}
+.cuact{display:flex;align-items:center;gap:12px}
+@media(max-width:900px){
+#side{width:68px}
+#side .brand{padding:18px 0 10px;justify-content:center}
+#side .brand .bw{display:none}
+.sq input,.sq kbd{display:none}
+.sq{justify-content:center;margin:6px 10px 8px;padding:0}
+.sq svg{margin:11px 0}
+.ni span{display:none}
+#nav button.ni{justify-content:center;padding:13px 0}
+.ng{font-size:0;padding:0;margin:8px 12px;border-top:1px solid var(--line);height:0;overflow:hidden}
+.sf{flex-direction:column;gap:8px}.sf small{display:none}
+#collapse{transform:scaleX(-1)}
+}
+body.sc{--sc:1}
+body.sc #side{width:68px}
+body.sc #side .brand{padding:18px 0 10px;justify-content:center}
+body.sc #side .brand .bw{display:none}
+body.sc .sq input,body.sc .sq kbd{display:none}
+body.sc .sq{justify-content:center;margin:6px 10px 8px;padding:0}
+body.sc .sq svg{margin:11px 0}
+body.sc .ni span{display:none}
+body.sc #nav button.ni{justify-content:center;padding:13px 0}
+body.sc .ng{font-size:0;padding:0;margin:8px 12px;border-top:1px solid var(--line);height:0;overflow:hidden}
+body.sc .sf{flex-direction:column;gap:8px}.sf small{display:none}
+body.sc #collapse{transform:scaleX(-1)}
+.lg{position:relative}
+#langBtn{display:flex;align-items:center;gap:8px;padding:7px 10px;font-size:11px}#langBtn svg{width:14px;height:14px}#langBtn b{letter-spacing:.12em}
+#langMenu{position:absolute;right:0;top:calc(100% + 6px);min-width:240px;background:var(--bg);border:1px solid var(--fg);z-index:40;box-shadow:0 14px 34px rgba(0,0,0,.5);animation:secin .18s}
+#langMenu[hidden]{display:none}
+.lo{display:flex;align-items:center;gap:12px;width:100%;border:0;border-bottom:1px solid var(--line);padding:11px 14px;text-align:left;text-transform:none;letter-spacing:.02em;font-size:12px}.lo:last-child{border-bottom:0}
+.lo i{font-style:normal;font-size:10px;letter-spacing:.12em;border:1px solid currentColor;padding:1px 5px;min-width:38px;text-align:center}.lo small{display:block;margin:0;letter-spacing:0;font-size:10px;color:var(--dim)}
+.lo.on{background:var(--fg);color:var(--bg)}.lo.on small{color:var(--bg);opacity:.7}.lo .ck{margin-left:auto}.lo:hover:not(.on),.lo:focus-visible:not(.on){background:color-mix(in srgb,var(--fg) 9%,transparent)}
+#shell.lf{animation:lflip .4s}@keyframes lflip{from{opacity:.15;filter:blur(4px)}to{opacity:1;filter:none}}
+#crumb{text-transform:uppercase}
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--fg);color:var(--bg);padding:10px 18px;font-size:11px;letter-spacing:.15em;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:120}#toast.on{opacity:1;transform:translate(-50%,0)}
+.thint{margin:8px 0;color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+#tText.act{border-color:var(--fg)}#tText{border-color:var(--line)}
+#tPunct.on{background:var(--fg);color:var(--bg)}
+.tbox{padding:0 16px;height:116px;overflow:hidden;position:relative;font-size:20px;line-height:38px;white-space:normal;word-break:normal;overflow-wrap:normal;scroll-behavior:auto}
+.tbox .wd{display:inline-block;white-space:pre;height:38px;vertical-align:top}
+@font-face{font-family:'RobotoMonoLocal';font-weight:300 500;font-display:swap;src:local('Roboto Mono'),local('RobotoMono-Regular'),url('fonts/RobotoMono-Regular.woff2') format('woff2')}
+@font-face{font-family:'RobotoMonoLocal';font-weight:600 800;font-display:swap;src:local('Roboto Mono Bold'),local('RobotoMono-Bold'),url('fonts/RobotoMono-Bold.woff2') format('woff2')}
+#boot.fast .bt-lw::after{animation-duration:.5s}
+#boot.fast .bt-logo{animation:btreveal .5s cubic-bezier(.7,0,.2,1) both}
+#boot.fast .bt-word{animation:btin .45s .35s both}#boot.fast .bt-sub{animation:btin .45s .5s both}#boot.fast .bt-skip{animation:none;opacity:0}
+</style></head><body>
+<div id="toast"></div>
+<div id="boot"><i class="bt-ring"></i><i class="bt-ring"></i><i class="bt-ring"></i>
+<div class="bt-lw"><div class="bt-logo"></div></div><i class="bt-word"></i><div class="bt-sub">HARDWARE DIAGNOSTIC SUITE</div>
+<div class="bt-load"><div class="bt-top"><span id="btP">0</span><span>%</span></div><div class="bt-bar"><i id="btBar"></i></div><div class="bt-log" id="btLog"></div><div class="bt-skip">TAP TO SKIP · DEVELOPED BY MOVES5</div></div></div>
+<div id="topbar"><i></i></div>
+<div id="app">
+<aside id="side">
+<div class="brand"><i class="lgs" role="img" aria-label="DiagOne logo"></i><div class="bw"><h1 class="sr">DiagOne</h1><i class="lgw"></i><small>HARDWARE DIAGNOSTIC SUITE</small></div></div>
+<label class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg><input type="text" id="navQ" placeholder="Search tools…" autocomplete="off"><kbd>Ctrl K</kbd></label>
+<nav id="nav"></nav>
+<div class="sf"><button id="collapse" title="Collapse sidebar">«</button><small>v2.0 · Moves5</small></div>
+</aside>
+<div id="shell">
+<header class="top"><div><small id="crumb"></small><div id="pgTitle"></div></div><div class="row" style="margin:0"><span id="clock"></span><div class="lg" id="lg" data-notr><button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Language"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><b id="langCode">EN</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div id="langMenu" role="listbox" hidden></div></div><button id="theme">Invert</button></div></header>
+<main>
+<p id="pgDesc"></p>
+<section id="home">
+<div class="hero"><h3>FULL CHECK-UP</h3><p>One click reads your system, Windows health, battery, disks and startup programs, and gives you a single report you can save and compare later.</p><div class="row"><button class="pri" id="cuGo">Run full check-up</button></div></div>
+<div id="cuOut"></div>
+<div id="homeCards"></div>
+<h2>Recent scans</h2><div id="homeRecent"></div>
+</section>
+
+<section id="keyboard">
+<div class="stats"><div class="stat"><b id="kLast">—</b><span>Last key</span></div><div class="stat"><b id="kCode">—</b><span>Code</span></div><div class="stat"><b id="kNow">0</b><span>Held now</span></div><div class="stat"><b id="kMax">0</b><span>Max NKRO</span></div><div class="stat"><b id="kTested">0</b><span>Keys tested</span></div></div>
+<h2>Layout</h2><div class="kb" id="kb"></div>
+<p>Press keys. Filled = held, outlined = tested. Hold many keys to measure rollover.</p>
+<button id="kReset">Reset</button>
+</section>
+
+<section id="typing">
+<div class="stats"><div class="stat"><b id="tTime">30</b><span>Time left</span></div><div class="stat"><b id="tWpm">0</b><span>WPM</span></div><div class="stat"><b id="tRaw">0</b><span>Raw WPM</span></div><div class="stat"><b id="tAcc">100%</b><span>Accuracy</span></div><div class="stat"><b id="tErr">0</b><span>Errors</span></div></div>
+<h2>Duration</h2>
+<div class="row" id="tDurs"><button data-d="15">15s</button><button data-d="30" class="on">30s</button><button data-d="60">60s</button><button data-d="120">120s</button></div>
+<h2>Type</h2><div class="tbox" id="tText" data-notr></div>
+<div id="tHint" class="thint">Start typing — the timer starts on your first key</div>
+<div id="tRes"></div>
+<p>The timer starts on your first key. Press TAB to restart with new words.</p>
+<div class="row"><button id="tNew">Restart</button><button id="tPunct">Punctuation</button></div>
+</section>
+
+<section id="mouse">
+<div class="stats"><div class="stat"><b id="mPos">0, 0</b><span>Position</span></div><div class="stat"><b id="mWheel">0</b><span>Wheel delta</span></div><div class="stat"><b id="mClicks">0</b><span>Clicks</span></div><div class="stat"><b id="mCps">0</b><span>Clicks / sec</span></div><div class="stat"><b id="mDbl">0</b><span>Double clicks</span></div></div>
+<h2>Buttons</h2>
+<div class="mb" id="mb"><div data-b="0">LEFT</div><div data-b="1">MIDDLE</div><div data-b="2">RIGHT</div><div data-b="3">BACK</div><div data-b="4">FORWARD</div></div>
+<h2>Test area</h2><div class="pad" id="pad">Click, scroll and move here</div>
+<div class="row"><button id="mReset">Reset</button></div>
+</section>
+
+<section id="monitor">
+<div class="stats"><div class="stat"><b id="hz">—</b><span>Refresh Hz</span></div><div class="stat"><b id="pace">—</b><span>Avg frame ms</span></div><div class="stat"><b id="stut">0</b><span>Micro-stutters</span></div><div class="stat"><b id="res">—</b><span>Resolution</span></div><div class="stat"><b id="ratio">—</b><span>Ratio</span></div><div class="stat"><b id="depth">—</b><span>Color depth</span></div></div>
+<h2>Fullscreen color test</h2>
+<p>Click to cycle colors, Esc to exit. Look for dead or stuck pixels and bleed.</p>
+<div class="row" id="colors"></div>
+<canvas id="mon" height="120"></canvas>
+</section>
+
+<section id="audio">
+<div class="led"><div id="lL">L</div><div id="lR">R</div></div>
+<h2>1 Channel identification</h2>
+<div class="row"><button data-t="L">Left</button><button data-t="R">Right</button><button data-t="B">Both</button></div>
+<h2>2 Stereo panning sweep</h2>
+<div class="row"><input type="range" id="pan" min="-100" max="100" value="0"><span id="panV">0.0</span><button id="sweep">Auto-sweep</button></div>
+<h2>3 Sub-bass response</h2>
+<div class="row"><button data-f="20">20</button><button data-f="30">30</button><button data-f="40">40</button><button data-f="50">50</button><button data-f="80">80</button><button data-f="100">100</button><button id="bass">Sweep 20–250 Hz</button></div>
+<h2>4 Frequency generator</h2>
+<div class="row"><input type="range" id="fq" min="0" max="1000" value="500"><span id="fqV">—</span><button id="fqGo">Start</button></div>
+<h2>5 Phase / polarity</h2>
+<div class="row"><button data-p="0">In-phase</button><button data-p="1">Out-of-phase</button></div>
+<div class="row"><button id="stop">Stop all</button></div>
+<p>Out-of-phase should sound thin or hollow with a centered speaker setup.</p>
+</section>
+
+<section id="mic">
+<div class="row"><button id="micGo" class="pri">Start microphone</button><button id="noise">Measure noise floor</button><span class="warn" id="clip">CLIPPING DETECTED</span></div>
+<div class="stats"><div class="stat"><b id="rms">-∞</b><span>Volume RMS dBFS</span></div><div class="stat"><b id="peak">-∞</b><span>Peak dBFS</span></div><div class="stat"><b id="nf">UNTESTED</b><span>Noise floor</span></div><div class="stat"><b id="ch">--</b><span>Channels</span></div><div class="stat"><b id="lat">--</b><span>Latency ms</span></div></div>
+<h2>Waveform</h2><canvas id="wave"></canvas>
+<h2>Spectrum</h2><canvas id="spec"></canvas>
+</section>
+<section id="system">
+<div class="row"><button id="sysScan" class="pri">Scan system</button><button id="sysExp" class="desk">Export .txt</button><button id="sysDx" class="desk">DxDiag</button></div>
+<div id="sysOut"><div class="empty">NO DATA<br><small>PRESS “SCAN SYSTEM” TO BEGIN</small></div></div>
+</section>
+
+<section id="drivers">
+<div class="row"><button id="drvScan" class="pri">Scan drivers</button><button id="drvExp" class="desk">Export .csv</button><button id="drvUp" class="desk">Windows Update</button><button id="drvDm" class="desk">Device Manager</button></div>
+<div class="row"><input type="text" id="drvQ" placeholder="Filter: name, class, maker, version"><span id="drvCount">0 / 0</span></div>
+<div id="drvOut"><div class="empty">NO DATA<br><small>PRESS “SCAN DRIVERS” TO BEGIN</small></div></div>
+<p>Lists every installed driver with version and date. To update drivers, use Windows Update or the manufacturer's site.</p>
+</section>
+
+<section id="live">
+<div class="stats"><div class="stat"><b id="lvCpu">—</b><span>CPU</span></div><div class="stat"><b id="lvRam">—</b><span>Memory</span></div><div class="stat"><b id="lvDisk">—</b><span>Disk activity</span></div><div class="stat"><b id="lvSpace">—</b><span>Disk space (C:)</span></div><div class="stat"><b id="lvNet">—</b><span>Network ↓ ↑ Mbps</span></div><div class="stat"><b id="lvTemp">—</b><span>Temperature</span></div></div>
+<h2>CPU %</h2><canvas class="g" id="gCpu"></canvas>
+<h2>Memory %</h2><canvas class="g" id="gRam"></canvas>
+<h2>Disk activity %</h2><canvas class="g" id="gDisk"></canvas>
+<h2>Network Mbps (solid = download, dashed = upload)</h2><canvas class="g" id="gNet"></canvas>
+<h2>Temperature °C</h2><canvas class="g" id="gTemp"></canvas>
+<div class="row"><button class="pri" id="lvToggle">Pause</button><button id="lvAdm">Run as administrator</button></div>
+<p id="lvNote"></p>
+</section>
+
+<section id="stress">
+<div class="stats"><div class="stat"><b id="sxEl">0 s</b><span>Elapsed</span></div><div class="stat"><b id="sxLoad">—</b><span>CPU load</span></div><div class="stat"><b id="sxTemp">—</b><span>Temperature</span></div><div class="stat"><b id="sxMaxT">—</b><span>Max temperature</span></div><div class="stat"><b id="sxFps">—</b><span>GPU FPS</span></div></div>
+<div class="row"><select id="sxMode"><option value="both">CPU + GPU</option><option value="cpu">CPU only</option><option value="gpu">GPU only</option></select><select id="sxDur"><option value="30">30 s</option><option value="60" selected>60 s</option><option value="120">120 s</option></select><select id="sxLim"><option value="85">Safety stop 85 °C</option><option value="90">Safety stop 90 °C</option><option value="95" selected>Safety stop 95 °C</option></select></div>
+<div class="row"><button class="pri" id="sxGo">Start stress test</button><button id="sxStop">Stop</button></div>
+<h2>Temperature °C</h2><canvas class="g" id="gSx"></canvas>
+<canvas id="sxGl" width="480" height="270" style="display:none;height:auto;aspect-ratio:16/9;margin-top:10px"></canvas>
+<div id="sxRes"></div>
+<p>The test stops by itself if the temperature reaches the safety limit. Laptops get hot: keep vents clear and stop it if the fans sound extreme. Temperature needs a sensor your PC exposes — without it the test is capped at 60 s.</p>
+</section>
+
+<section id="battery">
+<div class="row"><button class="pri" id="batGo">Scan battery</button></div>
+<div id="batOut"><div class="empty">NO DATA<br><small>PRESS “SCAN BATTERY” — LAPTOPS ONLY</small></div></div>
+</section>
+
+<section id="disk">
+<div class="row"><button class="pri" id="dkGo">Scan disks</button><button id="dkAdm">Run as administrator</button></div>
+<div id="dkOut"><div class="empty">NO DATA<br><small>PRESS “SCAN DISKS” TO READ SSD / HDD HEALTH</small></div></div>
+</section>
+
+<section id="health">
+<div class="row"><button class="pri" id="hlGo">Run health check</button></div>
+<div id="hlOut"><div class="empty">NO DATA<br><small>CHECKS UPDATES, FIREWALL, ANTIVIRUS AND DISK SPACE</small></div></div>
+</section>
+
+<section id="startup">
+<div class="row"><button class="pri" id="suGo">Scan startup apps</button><button id="suTm">Open Task Manager</button><button id="suSet">Open startup settings</button></div>
+<div id="suOut"><div class="empty">NO DATA<br><small>LISTS THE PROGRAMS THAT START WITH WINDOWS</small></div></div>
+</section>
+
+<section id="network">
+<div class="row"><button class="pri" id="ntGo">Scan network</button></div>
+<div id="ntOut"><div class="empty">NO DATA<br><small>IP ADDRESS, WI-FI SIGNAL, DNS AND PING TO COMMON SERVERS</small></div></div>
+</section>
+
+<section id="speed">
+<div class="row"><button class="pri" id="spGo">Start speed test</button></div>
+<div id="spOut"><div class="empty">NO DATA<br><small>MEASURES DOWNLOAD, UPLOAD, LATENCY AND JITTER</small></div></div>
+</section>
+
+<section id="history">
+<div class="row"><input type="text" id="hsLabel" placeholder="Label for new scans, e.g. BEFORE REPAIR"><select id="hsType"></select></div>
+<div class="row"><button class="pri" id="hsCmp">Compare selected</button><button id="hsClr">Clear all</button></div>
+<div id="hsOut"></div>
+<p>Every scan you run (specs, health, battery, disk, speed, stress) is saved here with its date. Tick two of the same kind and press Compare to see what changed.</p>
+</section>
+</main>
+<footer data-notr>Developed by Moves5</footer>
+</div></div>
+<div id="fs"><small>ESC / CLICK</small></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// theme + tabs
+$('#theme').onclick=()=>{const r=document.documentElement,l=matchMedia('(prefers-color-scheme:light)').matches;const cur=r.dataset.theme||(l?'light':'dark');r.dataset.theme=cur==='dark'?'light':'dark'};
+// ---- languages (full UI engine) ----
+const LANGS={en:['EN','English','English'],fil:['FIL','Filipino','Filipino'],es:['ES','Español','Spanish'],ja:['JA','日本語','Japanese'],zh:['ZH','简体中文','Chinese (Simplified)']};
+const LOCALES={en:'en-US',fil:'fil-PH',es:'es-ES',ja:'ja-JP',zh:'zh-CN'},LIDX={fil:0,es:1,ja:2,zh:3};
+const RAW=`Dashboard|Dashboard|Panel|ダッシュボード|仪表盘
+Keyboard|Keyboard|Teclado|キーボード|键盘
+Typing|Pag-type|Mecanografía|タイピング|打字
+Mouse|Mouse|Ratón|マウス|鼠标
+Monitor|Monitor|Monitor|モニター|显示器
+Audio|Audio|Audio|オーディオ|音频
+Mic|Mic|Micrófono|マイク|麦克风
+System|Sistema|Sistema|システム|系统
+Drivers|Mga Driver|Controladores|ドライバー|驱动程序
+Startup|Startup|Inicio|起動|启动项
+Live|Live|En vivo|ライブ|实时
+Stress|Stress test|Estrés|ストレス|压力测试
+Battery|Baterya|Batería|バッテリー|电池
+Disk|Disk|Disco|ディスク|磁盘
+Health|Kalusugan|Salud|診断|健康
+Network|Network|Red|ネットワーク|网络
+Speed|Bilis|Velocidad|速度|速度
+History|Kasaysayan|Historial|履歴|历史记录
+Overview|Pangkalahatan|Resumen|概要|概览
+Input|Input|Entrada|入力|输入
+Display & sound|Display at tunog|Pantalla y sonido|表示と音|显示与声音
+Monitoring|Pagsubaybay|Monitorización|監視|监控
+Records|Mga tala|Registros|記録|记录
+Search tools…|Maghanap ng tools…|Buscar herramientas…|ツールを検索…|搜索工具…
+Collapse sidebar|I-collapse ang sidebar|Contraer barra lateral|サイドバーを閉じる|收起侧边栏
+Invert|Baligtarin|Invertir|反転|反色
+Language|Wika|Idioma|言語|语言
+HARDWARE DIAGNOSTIC SUITE|Hardware diagnostic suite|Suite de diagnóstico de hardware|ハードウェア診断スイート|硬件诊断套件
+One-click check-up and shortcuts to every tool.|One-click na check-up at shortcut sa bawat tool.|Chequeo con un clic y accesos a todas las herramientas.|ワンクリック診断と各ツールへのショートカット。|一键体检和所有工具的快捷入口。
+Test every key, ghosting and N-key rollover.|I-test ang bawat key, ghosting at N-key rollover.|Prueba cada tecla, el ghosting y el N-key rollover.|全キー、ゴースティング、Nキーロールオーバーをテスト。|测试每个按键、鬼键和全键无冲。
+Measure your typing speed and accuracy.|Sukatin ang bilis at katumpakan ng pag-type mo.|Mide tu velocidad y precisión al escribir.|タイピング速度と正確さを測定。|测量你的打字速度和准确率。
+Check buttons, scroll wheel, double-clicks and click speed.|Suriin ang mga button, scroll wheel, double-click at bilis ng click.|Comprueba botones, rueda, doble clic y velocidad de clic.|ボタン、ホイール、ダブルクリック、クリック速度を確認。|检查按键、滚轮、双击和点击速度。
+Refresh rate, dead pixels, color and banding tests.|Refresh rate, dead pixel, kulay at banding test.|Frecuencia de actualización, píxeles muertos, color y banding.|リフレッシュレート、ドット抜け、色、バンディングのテスト。|刷新率、坏点、色彩和色带测试。
+Speaker channels, sweep, bass and phase tests.|Mga speaker channel, sweep, bass at phase test.|Canales de altavoz, barrido, graves y fase.|スピーカーのチャンネル、スイープ、低音、位相のテスト。|扬声器声道、扫频、低音和相位测试。
+Input level, clipping, noise floor and waveform.|Input level, clipping, ingay at waveform.|Nivel de entrada, saturación, ruido de fondo y forma de onda.|入力レベル、クリッピング、ノイズ、波形。|输入电平、削波、底噪和波形。
+Full specs of your computer, from CPU to BIOS.|Buong specs ng computer mo, mula CPU hanggang BIOS.|Especificaciones completas de tu equipo, de la CPU a la BIOS.|CPUからBIOSまで、PCの完全なスペック。|电脑完整规格，从CPU到BIOS。
+Every installed driver with its version and date.|Bawat naka-install na driver kasama ang version at petsa.|Cada controlador instalado con su versión y fecha.|インストール済みの全ドライバーとそのバージョン・日付。|所有已安装驱动及其版本和日期。
+Programs that start with Windows and what they cost.|Mga programang nagsisimula sa Windows at ang bigat nila.|Programas que inician con Windows y lo que consumen.|Windows と同時に起動するプログラムと負荷。|随Windows启动的程序及其资源占用。
+Real-time CPU, memory, disk, network and temperature.|Real-time na CPU, memorya, disk, network at temperatura.|CPU, memoria, disco, red y temperatura en tiempo real.|CPU、メモリ、ディスク、ネットワーク、温度をリアルタイム表示。|实时CPU、内存、磁盘、网络和温度。
+CPU and GPU load test with a thermal safety stop.|CPU at GPU load test na may thermal safety stop.|Prueba de carga de CPU y GPU con parada de seguridad térmica.|熱保護付きのCPU・GPU負荷テスト。|带过热保护的CPU和GPU负载测试。
+Capacity, wear, cycle count and charge rate.|Capacity, wear, cycle count at charge rate.|Capacidad, desgaste, ciclos y velocidad de carga.|容量、劣化、サイクル数、充電速度。|容量、损耗、循环次数和充电速率。
+SSD and hard drive health, temperature and life left.|Kalusugan ng SSD at hard drive, temperatura at natitirang buhay.|Salud, temperatura y vida restante de SSD y discos duros.|SSD・HDDの健康状態、温度、残り寿命。|SSD和硬盘的健康度、温度和剩余寿命。
+Updates, firewall, antivirus and disk space check.|Pagsusuri ng updates, firewall, antivirus at disk space.|Revisión de actualizaciones, firewall, antivirus y espacio en disco.|更新、ファイアウォール、ウイルス対策、ディスク容量の確認。|检查更新、防火墙、杀毒软件和磁盘空间。
+IP, DNS, Wi-Fi signal and ping to common servers.|IP, DNS, Wi-Fi signal at ping sa karaniwang server.|IP, DNS, señal Wi-Fi y ping a servidores comunes.|IP、DNS、Wi-Fi 信号、主要サーバーへの ping。|IP、DNS、Wi-Fi信号及到常用服务器的延迟。
+Download, upload, latency and jitter test.|Download, upload, latency at jitter test.|Prueba de descarga, subida, latencia y jitter.|ダウンロード、アップロード、遅延、ジッターのテスト。|下载、上传、延迟和抖动测试。
+Saved scans with dates, and a before/after compare.|Mga naka-save na scan na may petsa, at before/after compare.|Escaneos guardados con fecha y comparación antes/después.|日付付きの保存済みスキャンと、前後比較。|带日期的已保存扫描，以及前后对比。
+FULL CHECK-UP|Buong check-up|Chequeo completo|フルチェック|全面体检
+Run full check-up|Patakbuhin ang buong check-up|Ejecutar chequeo completo|フルチェックを実行|运行全面体检
+One click reads your system, Windows health, battery, disks and startup programs, and gives you a single report you can save and compare later.|Isang click lang para basahin ang system, kalusugan ng Windows, baterya, disk at startup programs, at magbibigay ng iisang report na puwede mong i-save at ihambing mamaya.|Un clic lee tu sistema, la salud de Windows, la batería, los discos y los programas de inicio, y te da un único informe que puedes guardar y comparar después.|ワンクリックで、システム・Windowsの状態・バッテリー・ディスク・起動プログラムを読み取り、保存して後で比較できる1つのレポートにまとめます。|一键读取系统、Windows 健康状况、电池、磁盘和启动程序，生成一份可保存并稍后对比的报告。
+Recent scans|Mga huling scan|Escaneos recientes|最近のスキャン|最近的扫描
+Open|Buksan|Abrir|開く|打开
+NO SCANS YET|Wala pang scan|Aún no hay escaneos|スキャンはまだありません|暂无扫描
+RUN A CHECK-UP TO GET STARTED|Magpatakbo ng check-up para magsimula|Ejecuta un chequeo para empezar|チェックを実行して開始|运行体检即可开始
+EVERYTHING LOOKS GOOD|Maayos ang lahat|Todo se ve bien|すべて良好です|一切正常
+This report was saved to History.|Na-save ang report na ito sa History.|Este informe se guardó en el Historial.|このレポートは履歴に保存されました。|此报告已保存到历史记录。
+Start|Simulan|Iniciar|開始|开始
+Stop|Ihinto|Detener|停止|停止
+Pause|I-pause|Pausar|一時停止|暂停
+Resume|Ituloy|Reanudar|再開|继续
+Reset|I-reset|Restablecer|リセット|重置
+Restart|I-restart|Reiniciar|再開|重新开始
+Delete|Burahin|Eliminar|削除|删除
+View|Tingnan|Ver|表示|查看
+Clear|Burahin|Borrar|クリア|清除
+Clear all|Burahin lahat|Borrar todo|すべて削除|全部清除
+Compare selected|Ihambing ang napili|Comparar seleccionados|選択を比較|对比所选项
+Delete all saved scans?|Burahin ang lahat ng naka-save na scan?|¿Eliminar todos los escaneos guardados?|保存済みスキャンをすべて削除しますか？|删除所有已保存的扫描？
+Stop all|Ihinto lahat|Detener todo|すべて停止|全部停止
+Auto-sweep|Auto-sweep|Barrido automático|自動スイープ|自动扫频
+Device Manager|Device Manager|Administrador de dispositivos|デバイス マネージャー|设备管理器
+Run as administrator|Patakbuhin bilang administrator|Ejecutar como administrador|管理者として実行|以管理员身份运行
+Export .txt|I-export ang .txt|Exportar .txt|.txt を書き出し|导出 .txt
+Export .csv|I-export ang .csv|Exportar .csv|.csv を書き出し|导出 .csv
+Last key|Huling key|Última tecla|最後のキー|上一个按键
+Code|Code|Código|コード|代码
+Held now|Hawak ngayon|Pulsadas ahora|押下中|当前按下
+Max NKRO|Max NKRO|NKRO máx.|最大NKRO|最大NKRO
+Keys tested|Na-test na keys|Teclas probadas|テスト済みキー|已测试按键
+Layout|Layout|Distribución|レイアウト|布局
+Time left|Natitirang oras|Tiempo restante|残り時間|剩余时间
+Raw WPM|Raw WPM|PPM bruto|生WPM|原始WPM
+Accuracy|Katumpakan|Precisión|正確さ|准确率
+Errors|Mga mali|Errores|ミス|错误
+Duration|Tagal|Duración|時間|时长
+Type|Uri|Tipo|種類|类型
+The timer starts on your first key. Press TAB to restart with new words.|Magsisimula ang timer sa unang key mo. Pindutin ang TAB para mag-restart gamit ang bagong mga salita.|El temporizador empieza con tu primera tecla. Pulsa TAB para reiniciar con palabras nuevas.|最初のキー入力でタイマーが始まります。TABで新しい単語で再開。|首次按键开始计时。按 TAB 用新单词重新开始。
+keep practicing|magpractice pa|sigue practicando|もっと練習しましょう|继续练习
+upper tier|mataas na antas|nivel alto|上級者レベル|高水平
+Position|Posisyon|Posición|位置|位置
+Wheel delta|Wheel delta|Delta de rueda|ホイール量|滚轮增量
+Clicks|Mga click|Clics|クリック|点击
+Clicks / sec|Click / segundo|Clics / s|クリック/秒|点击/秒
+Double clicks|Mga double click|Dobles clics|ダブルクリック|双击
+Buttons|Mga button|Botones|ボタン|按键
+LEFT|Kaliwa|Izquierdo|左|左键
+MIDDLE|Gitna|Central|中|中键
+RIGHT|Kanan|Derecho|右|右键
+BACK|Back|Atrás|戻る|后退
+FORWARD|Forward|Adelante|進む|前进
+Test area|Lugar ng test|Área de prueba|テスト領域|测试区域
+Click, scroll and move here|Mag-click, mag-scroll at gumalaw dito|Haz clic, desplaza y mueve aquí|ここでクリック・スクロール・移動|在此点击、滚动和移动
+Refresh Hz|Refresh Hz|Hz de actualización|リフレッシュHz|刷新率 Hz
+Avg frame ms|Avg frame ms|ms medio por fotograma|平均フレームms|平均帧耗时 ms
+Micro-stutters|Micro-stutter|Microtirones|マイクロスタッター|微卡顿
+Resolution|Resolusyon|Resolución|解像度|分辨率
+Ratio|Ratio|Relación|比率|比例
+Color depth|Lalim ng kulay|Profundidad de color|色深度|色深
+Fullscreen color test|Fullscreen na color test|Prueba de color a pantalla completa|全画面カラーテスト|全屏色彩测试
+Click to cycle colors, Esc to exit. Look for dead or stuck pixels and bleed.|I-click para palitan ang kulay, Esc para lumabas. Hanapin ang dead o stuck pixel at bleed.|Haz clic para cambiar de color, Esc para salir. Busca píxeles muertos o atascados y fugas de luz.|クリックで色を切替、Escで終了。ドット抜け・焼き付き・光漏れを確認。|点击切换颜色，Esc 退出。查找坏点、亮点和漏光。
+Black|Itim|Negro|黒|黑
+White|Puti|Blanco|白|白
+Red|Pula|Rojo|赤|红
+Green|Berde|Verde|緑|绿
+Blue|Asul|Azul|青|蓝
+Gray|Abo|Gris|グレー|灰
+1 Channel identification|1 Pagkilala sa channel|1 Identificación de canales|1 チャンネル確認|1 声道识别
+2 Stereo panning sweep|2 Stereo panning sweep|2 Barrido de panorama estéreo|2 ステレオパンスイープ|2 立体声平移扫描
+3 Sub-bass response|3 Sub-bass response|3 Respuesta de subgraves|3 サブベース応答|3 超低音响应
+4 Frequency generator|4 Frequency generator|4 Generador de frecuencia|4 周波数ジェネレーター|4 频率发生器
+5 Phase / polarity|5 Phase / polarity|5 Fase / polaridad|5 位相 / 極性|5 相位 / 极性
+Left|Kaliwa|Izquierda|左|左
+Right|Kanan|Derecha|右|右
+Both|Pareho|Ambos|両方|双声道
+In-phase|In-phase|En fase|同相|同相
+Out-of-phase|Out-of-phase|Fuera de fase|逆相|反相
+Out-of-phase should sound thin or hollow with a centered speaker setup.|Dapat manipis o guwang ang tunog ng out-of-phase sa nakasentrong speaker setup.|Fuera de fase debería sonar fino o hueco con altavoces centrados.|逆相は、中央配置のスピーカーでは薄く空洞のように聞こえるはずです。|反相在居中摆放的扬声器上应听起来单薄或空洞。
+Sweep 20–250 Hz|Sweep 20–250 Hz|Barrido 20–250 Hz|スイープ 20–250 Hz|扫频 20–250 Hz
+Start microphone|Simulan ang mic|Iniciar micrófono|マイクを開始|启动麦克风
+Stop microphone|Ihinto ang mic|Detener micrófono|マイクを停止|停止麦克风
+Measure noise floor|Sukatin ang ingay|Medir ruido de fondo|ノイズフロアを測定|测量底噪
+Volume RMS dBFS|Volume RMS dBFS|Volumen RMS dBFS|音量 RMS dBFS|音量 RMS dBFS
+Peak dBFS|Peak dBFS|Pico dBFS|ピーク dBFS|峰值 dBFS
+Noise floor|Ingay (noise floor)|Ruido de fondo|ノイズフロア|底噪
+Channels|Mga channel|Canales|チャンネル|声道
+Latency ms|Latency ms|Latencia ms|遅延 ms|延迟 ms
+CLIPPING DETECTED|Nakita ang clipping|Saturación detectada|クリッピング検出|检测到削波
+UNTESTED|Hindi pa na-test|Sin probar|未テスト|未测试
+NOISY|Maingay|Ruidoso|ノイズ大|噪声大
+STAY QUIET|Manatiling tahimik|Mantén silencio|静かにしてください|请保持安静
+DENIED|Tinanggihan|Denegado|拒否|已拒绝
+Waveform|Waveform|Forma de onda|波形|波形
+Spectrum|Spectrum|Espectro|スペクトラム|频谱
+Scan system|I-scan ang system|Escanear sistema|システムをスキャン|扫描系统
+Scan drivers|I-scan ang drivers|Escanear controladores|ドライバーをスキャン|扫描驱动
+Filter: name, class, maker, version|I-filter: pangalan, class, gumawa, version|Filtrar: nombre, clase, fabricante, versión|絞り込み: 名前、クラス、メーカー、バージョン|筛选：名称、类别、厂商、版本
+NO DATA|Walang data|Sin datos|データなし|无数据
+PRESS “SCAN SYSTEM” TO BEGIN|Pindutin ang “I-scan ang system” para magsimula|Pulsa “Escanear sistema” para empezar|「システムをスキャン」を押して開始|点击“扫描系统”开始
+PRESS “SCAN DRIVERS” TO BEGIN|Pindutin ang “I-scan ang drivers” para magsimula|Pulsa “Escanear controladores” para empezar|「ドライバーをスキャン」を押して開始|点击“扫描驱动”开始
+THE WEB VERSION CANNOT READ YOUR DRIVERS — USE THE .EXE|Hindi mabasa ng web version ang drivers mo — gamitin ang .EXE|La versión web no puede leer tus controladores — usa el .EXE|Web版ではドライバーを読み取れません — .EXE を使用してください|网页版无法读取驱动 — 请使用 .EXE
+No drivers to show.|Walang driver na maipapakita.|No hay controladores que mostrar.|表示するドライバーがありません。|没有可显示的驱动。
+Computer|Computer|Equipo|コンピューター|计算机
+Operating system|Operating system|Sistema operativo|オペレーティングシステム|操作系统
+Processor|Processor|Procesador|プロセッサ|处理器
+Graphics|Graphics|Gráficos|グラフィックス|显卡
+Storage|Storage|Almacenamiento|ストレージ|存储
+Model|Model|Modelo|モデル|型号
+Manufacturer|Manufacturer|Fabricante|メーカー|制造商
+Motherboard|Motherboard|Placa base|マザーボード|主板
+BIOS version|Bersyon ng BIOS|Versión de BIOS|BIOSバージョン|BIOS 版本
+BIOS date|Petsa ng BIOS|Fecha de BIOS|BIOS日付|BIOS 日期
+Serial number|Serial number|Número de serie|シリアル番号|序列号
+System type|Uri ng system|Tipo de sistema|システムの種類|系统类型
+Version|Version|Versión|バージョン|版本
+Build|Build|Compilación|ビルド|版本号
+Installed|Naka-install|Instalado|インストール日|安装时间
+Last boot|Huling boot|Último arranque|最終起動|上次启动
+Cores / threads|Cores / threads|Núcleos / hilos|コア / スレッド|核心 / 线程
+Max clock|Max clock|Reloj máx.|最大クロック|最高频率
+CPU threads|CPU threads|Hilos de CPU|CPUスレッド|CPU 线程数
+Driver version|Bersyon ng driver|Versión del controlador|ドライババージョン|驱动版本
+Adapter|Adapter|Adaptador|アダプター|适配器
+Device|Device|Dispositivo|デバイス|设备
+Class|Class|Clase|クラス|类别
+Date|Petsa|Fecha|日付|日期
+Slot|Slot|Ranura|スロット|插槽
+Drive|Drive|Unidad|ドライブ|驱动器
+Platform|Platform|Plataforma|プラットフォーム|平台
+Timezone|Time zone|Zona horaria|タイムゾーン|时区
+User agent|User agent|Agente de usuario|ユーザーエージェント|用户代理
+Channel|Channel|Canal|チャンネル|信道
+Architecture|Architecture|Arquitectura|アーキテクチャ|架构
+Disk activity|Aktibidad ng disk|Actividad del disco|ディスク使用率|磁盘活动
+Disk space|Espasyo ng disk|Espacio en disco|ディスク容量|磁盘空间
+Disk space (C:)|Espasyo ng disk (C:)|Espacio en disco (C:)|ディスク容量 (C:)|磁盘空间 (C:)
+Network ↓ ↑ Mbps|Network ↓ ↑ Mbps|Red ↓ ↑ Mbps|ネットワーク ↓ ↑ Mbps|网络 ↓ ↑ Mbps
+Temperature|Temperatura|Temperatura|温度|温度
+Memory|Memorya|Memoria|メモリ|内存
+Memory %|Memorya %|Memoria %|メモリ %|内存 %
+Disk activity %|Aktibidad ng disk %|Actividad del disco %|ディスク使用率 %|磁盘活动 %
+Temperature °C|Temperatura °C|Temperatura °C|温度 °C|温度 °C
+Network Mbps (solid = download, dashed = upload)|Network Mbps (tuloy = download, putol = upload)|Red Mbps (continua = descarga, discontinua = subida)|ネットワーク Mbps（実線 = ダウンロード、破線 = アップロード）|网络 Mbps（实线 = 下载，虚线 = 上传）
+Desktop app only — the live monitor reads your real CPU, disk, network and temperature.|Desktop app lang — binabasa ng live monitor ang totoong CPU, disk, network at temperatura mo.|Solo app de escritorio: el monitor en vivo lee tu CPU, disco, red y temperatura reales.|デスクトップアプリ専用 — ライブモニターは実際のCPU・ディスク・ネットワーク・温度を読み取ります。|仅限桌面应用 — 实时监控读取你真实的CPU、磁盘、网络和温度。
+DESKTOP APP ONLY|Desktop app lang|Solo app de escritorio|デスクトップアプリ専用|仅限桌面应用
+desktop app only|desktop app lang|solo app de escritorio|デスクトップアプリ専用|仅限桌面应用
+OPEN DIAGONE.EXE FOR THIS FEATURE|Buksan ang DiagOne.exe para sa feature na ito|Abre DiagOne.exe para esta función|この機能は DiagOne.exe で開いてください|请打开 DiagOne.exe 使用此功能
+Elapsed|Lumipas|Transcurrido|経過|已用时间
+CPU load|CPU load|Carga de CPU|CPU負荷|CPU 负载
+Max temperature|Max na temperatura|Temperatura máx.|最高温度|最高温度
+CPU only|CPU lang|Solo CPU|CPUのみ|仅CPU
+GPU only|GPU lang|Solo GPU|GPUのみ|仅GPU
+Safety stop 85 °C|Safety stop 85 °C|Parada de seguridad 85 °C|安全停止 85 °C|安全停止 85 °C
+Safety stop 90 °C|Safety stop 90 °C|Parada de seguridad 90 °C|安全停止 90 °C|安全停止 90 °C
+Safety stop 95 °C|Safety stop 95 °C|Parada de seguridad 95 °C|安全停止 95 °C|安全停止 95 °C
+Start stress test|Simulan ang stress test|Iniciar prueba de estrés|ストレステストを開始|开始压力测试
+CPU speed drop|Pagbaba ng bilis ng CPU|Caída de velocidad de CPU|CPU速度低下|CPU 降速
+GPU FPS drop|Pagbaba ng GPU FPS|Caída de FPS de GPU|GPU FPS低下|GPU 帧率下降
+Result|Resulta|Resultado|結果|结果
+Verdict|Hatol|Veredicto|判定|结论
+STABLE — COOLING IS FINE|Stable — maayos ang cooling|Estable — la refrigeración es buena|安定 — 冷却は問題なし|稳定 — 散热良好
+WARM — ACCEPTABLE|Mainit — katanggap-tanggap|Cálido — aceptable|やや高温 — 許容範囲|偏热 — 可接受
+THROTTLING — COOLING MAY BE POOR|Throttling — maaaring mahina ang cooling|Throttling — la refrigeración puede ser deficiente|スロットリング — 冷却が不十分な可能性|降频 — 散热可能较差
+THERMAL LIMIT HIT|Naabot ang thermal limit|Límite térmico alcanzado|温度上限に到達|已达温度上限
+TOO SHORT TO JUDGE|Masyadong maikli para husgahan|Demasiado corto para juzgar|短すぎて判定できません|时间太短，无法判断
+STOPPED BY YOU|Pinigil mo|Detenido por ti|ユーザーが停止|已由你停止
+STOPPED — LEFT THE TAB|Tinigil — umalis sa tab|Detenido — saliste de la pestaña|停止 — タブを離れました|已停止 — 离开了此页
+COMPLETED|Natapos|Completado|完了|已完成
+Reading temperature sensor…|Binabasa ang temperature sensor…|Leyendo sensor de temperatura…|温度センサーを読み取り中…|正在读取温度传感器…
+Scan battery|I-scan ang baterya|Escanear batería|バッテリーをスキャン|扫描电池
+PRESS “SCAN BATTERY” — LAPTOPS ONLY|Pindutin ang “I-scan ang baterya” — laptop lang|Pulsa “Escanear batería” — solo portátiles|「バッテリーをスキャン」を押す — ノートPCのみ|点击“扫描电池” — 仅限笔记本
+Design capacity|Design capacity|Capacidad de diseño|設計容量|设计容量
+Full charge capacity|Full charge capacity|Capacidad de carga completa|満充電容量|满充容量
+Cycle count|Cycle count|Ciclos de carga|サイクル数|循环次数
+Charge now|Charge ngayon|Carga actual|現在の充電量|当前电量
+Power flow|Power flow|Flujo de energía|電力フロー|功率流向
+Wear|Wear|Desgaste|劣化|损耗
+Capacity|Capacity|Capacidad|容量|容量
+Status|Status|Estado|状態|状态
+Discharging|Nagdi-discharge|Descargando|放電中|放电中
+Charging|Nagcha-charge|Cargando|充電中|充电中
+Fully charged|Puno ang charge|Carga completa|満充電|已充满
+On AC power|Nakasaksak sa AC|Con alimentación CA|AC電源使用中|使用交流电源
+Partly charged|Bahagyang charged|Parcialmente cargada|一部充電済み|部分充电
+Low|Mababa|Baja|低|低
+Critical|Kritikal|Crítica|重大|严重
+EXCELLENT — LIKE NEW|Mahusay — parang bago|Excelente — como nueva|非常に良好 — 新品同様|优秀 — 如同新电池
+GOOD|Mabuti|Buena|良好|良好
+FAIR — PLAN A REPLACEMENT|Katamtaman — magplano ng pagpalit|Regular — planifica un reemplazo|普通 — 交換を検討|一般 — 建议计划更换
+POOR — REPLACE SOON|Mahina — palitan na agad|Mala — reemplazar pronto|不良 — 早めに交換|较差 — 尽快更换
+CAPACITY NOT REPORTED BY THIS BATTERY|Hindi iniuulat ng bateryang ito ang capacity|Esta batería no informa la capacidad|このバッテリーは容量を報告しません|此电池未报告容量
+NO BATTERY DETECTED|Walang nakitang baterya|No se detectó batería|バッテリーが見つかりません|未检测到电池
+THIS IS PROBABLY A DESKTOP PC|Malamang desktop PC ito|Probablemente es un PC de sobremesa|おそらくデスクトップPCです|这可能是台式电脑
+Capacity not reported|Hindi iniulat ang capacity|Capacidad no informada|容量が報告されていません|未报告容量
+Health is full-charge capacity divided by design capacity. Below about 70% you will notice shorter battery life.|Ang health ay full-charge capacity na hinati sa design capacity. Sa ibaba ng ~70%, mapapansin mong mas maikli ang battery life.|La salud es la capacidad de carga completa dividida por la de diseño. Por debajo de ~70% notarás menos autonomía.|健全性は満充電容量を設計容量で割った値です。約70%を下回ると駆動時間が短く感じられます。|健康度 = 满充容量 ÷ 设计容量。低于约70%时续航会明显变短。
+BATTERY SCAN|Scan ng baterya|Escaneo de batería|バッテリースキャン|电池扫描
+DISK HEALTH SCAN|Scan ng kalusugan ng disk|Escaneo de salud del disco|ディスク診断スキャン|磁盘健康扫描
+DRIVER SCAN|Scan ng driver|Escaneo de controladores|ドライバースキャン|驱动扫描
+SYSTEM SCAN|Scan ng system|Escaneo del sistema|システムスキャン|系统扫描
+HEALTH CHECK|Health check|Revisión de salud|ヘルスチェック|健康检查
+STARTUP SCAN|Scan ng startup|Escaneo de inicio|起動スキャン|启动项扫描
+NETWORK SCAN|Scan ng network|Escaneo de red|ネットワークスキャン|网络扫描
+SCAN FAILED|Nabigo ang scan|Escaneo fallido|スキャン失敗|扫描失败
+TEST FAILED|Nabigo ang test|Prueba fallida|テスト失敗|测试失败
+CHECK YOUR INTERNET CONNECTION|Suriin ang internet connection mo|Revisa tu conexión a Internet|インターネット接続を確認してください|请检查你的网络连接
+Scan disks|I-scan ang disk|Escanear discos|ディスクをスキャン|扫描磁盘
+PRESS “SCAN DISKS” TO READ SSD / HDD HEALTH|Pindutin ang “I-scan ang disk” para basahin ang kalusugan ng SSD / HDD|Pulsa “Escanear discos” para leer la salud de SSD / HDD|「ディスクをスキャン」でSSD/HDDの状態を確認|点击“扫描磁盘”读取 SSD / HDD 健康状态
+NO DISKS FOUND|Walang nakitang disk|No se encontraron discos|ディスクが見つかりません|未找到磁盘
+Power-on time|Oras na naka-on|Tiempo encendido|通電時間|通电时间
+Remaining life|Natitirang buhay|Vida restante|残り寿命|剩余寿命
+Read / write errors|Mga read / write error|Errores de lectura / escritura|読み書きエラー|读写错误
+Healthy|Malusog|Saludable|正常|健康
+Run health check|Patakbuhin ang health check|Ejecutar revisión de salud|ヘルスチェックを実行|运行健康检查
+CHECKS UPDATES, FIREWALL, ANTIVIRUS AND DISK SPACE|Sinusuri ang updates, firewall, antivirus at disk space|Revisa actualizaciones, firewall, antivirus y espacio en disco|更新・ファイアウォール・ウイルス対策・ディスク容量を確認|检查更新、防火墙、杀毒软件和磁盘空间
+Windows health|Kalusugan ng Windows|Salud de Windows|Windowsの状態|Windows 健康状况
+Restart required|Kailangan ng restart|Reinicio requerido|再起動が必要|需要重启
+A restart is pending to finish updates.|May nakabinbing restart para matapos ang updates.|Hay un reinicio pendiente para terminar las actualizaciones.|更新を完了するための再起動が保留中です。|有待完成更新的重启。
+No restart pending|Walang nakabinbing restart|Sin reinicio pendiente|再起動の保留なし|没有待处理的重启
+No pending updates|Walang nakabinbing update|Sin actualizaciones pendientes|保留中の更新なし|没有待安装的更新
+Last update installed|Huling update na na-install|Última actualización instalada|最後にインストールされた更新|最近安装的更新
+Firewall|Firewall|Firewall|ファイアウォール|防火墙
+Antivirus|Antivirus|Antivirus|ウイルス対策|杀毒软件
+No antivirus found|Walang antivirus na nakita|No se encontró antivirus|ウイルス対策が見つかりません|未找到杀毒软件
+Defender real-time protection|Real-time protection ng Defender|Protección en tiempo real de Defender|Defenderのリアルタイム保護|Defender 实时保护
+Could not read firewall state|Hindi nabasa ang estado ng firewall|No se pudo leer el estado del firewall|ファイアウォールの状態を読み取れません|无法读取防火墙状态
+Check failed|Nabigo ang check|Revisión fallida|チェック失敗|检查失败
+Could not read system specs|Hindi nabasa ang system specs|No se pudieron leer las especificaciones|システム仕様を読み取れません|无法读取系统规格
+Unknown|Hindi alam|Desconocido|不明|未知
+ALL GOOD|Maayos lahat|Todo bien|すべて良好|一切正常
+OFF|Off|Apagado|オフ|关闭
+ON|On|Encendido|オン|开启
+Scan startup apps|I-scan ang startup apps|Escanear apps de inicio|起動アプリをスキャン|扫描启动项
+Open Task Manager|Buksan ang Task Manager|Abrir Administrador de tareas|タスクマネージャーを開く|打开任务管理器
+Open startup settings|Buksan ang startup settings|Abrir ajustes de inicio|スタートアップ設定を開く|打开启动设置
+LISTS THE PROGRAMS THAT START WITH WINDOWS|Inililista ang mga programang nagsisimula sa Windows|Lista los programas que inician con Windows|Windows と同時に起動するプログラムを一覧表示|列出随 Windows 启动的程序
+Startup items|Mga startup item|Elementos de inicio|スタートアップ項目|启动项数量
+Enabled|Naka-enable|Activados|有効|已启用
+High impact|Mataas na impact|Alto impacto|影響大|高占用
+Last boot time|Oras ng huling boot|Duración del último arranque|前回の起動時間|上次启动用时
+Program|Program|Programa|プログラム|程序
+State|Estado|Estado|状態|状态
+Using now|Gamit ngayon|En uso ahora|現在の使用量|当前占用
+Impact|Impact|Impacto|影響|影响
+ENABLED|Naka-enable|Activado|有効|已启用
+DISABLED|Naka-disable|Desactivado|無効|已禁用
+NOT RUNNING|Hindi gumagana|No en ejecución|未実行|未运行
+HIGH|Mataas|Alto|高|高
+MEDIUM|Katamtaman|Medio|中|中
+Scan network|I-scan ang network|Escanear red|ネットワークをスキャン|扫描网络
+IP ADDRESS, WI-FI SIGNAL, DNS AND PING TO COMMON SERVERS|IP address, Wi-Fi signal, DNS at ping sa karaniwang server|Dirección IP, señal Wi-Fi, DNS y ping a servidores comunes|IPアドレス、Wi-Fi信号、DNS、主要サーバーへのping|IP地址、Wi-Fi信号、DNS及到常用服务器的延迟
+Public IP|Public IP|IP pública|グローバルIP|公网 IP
+Public connection|Public connection|Conexión pública|公開接続|公网连接
+Country|Bansa|País|国|国家/地区
+Nearest Cloudflare server|Pinakamalapit na Cloudflare server|Servidor de Cloudflare más cercano|最寄りのCloudflareサーバー|最近的 Cloudflare 服务器
+DNS servers|Mga DNS server|Servidores DNS|DNSサーバー|DNS 服务器
+Gateway|Gateway|Puerta de enlace|ゲートウェイ|网关
+Link speed|Link speed|Velocidad de enlace|リンク速度|连接速率
+Signal|Signal|Señal|信号|信号
+Radio|Radio|Radio|無線方式|无线类型
+Band|Band|Banda|帯域|频段
+Receive / transmit|Receive / transmit|Recepción / transmisión|受信 / 送信|接收 / 发送
+Security|Security|Seguridad|セキュリティ|安全性
+Server|Server|Servidor|サーバー|服务器
+Average|Average|Promedio|平均|平均
+Min / max|Min / max|Mín. / máx.|最小 / 最大|最小 / 最大
+Loss|Loss|Pérdida|損失|丢包
+Ping (TCP connect time)|Ping (TCP connect time)|Ping (tiempo de conexión TCP)|Ping（TCP接続時間）|延迟（TCP 连接时间）
+Network (SSID)|Network (SSID)|Red (SSID)|ネットワーク (SSID)|网络 (SSID)
+ONLINE|Online|En línea|オンライン|在线
+Start speed test|Simulan ang speed test|Iniciar prueba de velocidad|速度テストを開始|开始测速
+MEASURES DOWNLOAD, UPLOAD, LATENCY AND JITTER|Sinusukat ang download, upload, latency at jitter|Mide descarga, subida, latencia y jitter|ダウンロード・アップロード・遅延・ジッターを測定|测量下载、上传、延迟和抖动
+Download|Download|Descarga|ダウンロード|下载
+Upload|Upload|Subida|アップロード|上传
+Latency|Latency|Latencia|遅延|延迟
+Jitter|Jitter|Jitter|ジッター|抖动
+MEASURING LATENCY|Sinusukat ang latency|Midiendo latencia|遅延を測定中|正在测量延迟
+TESTING DOWNLOAD|Tine-test ang download|Probando descarga|ダウンロードをテスト中|正在测试下载
+TESTING UPLOAD|Tine-test ang upload|Probando subida|アップロードをテスト中|正在测试上传
+FAST — GREAT FOR 4K, GAMING AND LARGE DOWNLOADS|Mabilis — maganda para sa 4K, gaming at malalaking download|Rápida — ideal para 4K, juegos y descargas grandes|高速 — 4K・ゲーム・大容量ダウンロードに最適|很快 — 适合4K、游戏和大文件下载
+GOOD — FINE FOR HD VIDEO, CALLS AND GAMING|Mabuti — OK para sa HD video, tawag at gaming|Buena — válida para vídeo HD, llamadas y juegos|良好 — HD動画・通話・ゲームに十分|良好 — 适合高清视频、通话和游戏
+SLOW — OK FOR BROWSING AND SD VIDEO|Mabagal — OK para sa browsing at SD video|Lenta — válida para navegar y vídeo SD|低速 — ブラウジングとSD動画向け|较慢 — 适合浏览网页和标清视频
+VERY SLOW|Napakabagal|Muy lenta|非常に低速|非常慢
+Test server: Cloudflare. Results vary with Wi-Fi signal and other devices on your network.|Test server: Cloudflare. Nag-iiba ang resulta depende sa Wi-Fi signal at iba pang device sa network mo.|Servidor de prueba: Cloudflare. Los resultados varían según la señal Wi-Fi y otros dispositivos de tu red.|テストサーバー: Cloudflare。結果はWi-Fi信号やネットワーク上の他の機器で変わります。|测试服务器：Cloudflare。结果会受 Wi-Fi 信号和网络中其他设备影响。
+Label for new scans, e.g. BEFORE REPAIR|Label para sa mga bagong scan, hal. BAGO IPAYOS|Etiqueta para nuevos escaneos, p. ej. ANTES DE REPARAR|新しいスキャンのラベル（例: 修理前）|新扫描的标签，例如：维修前
+All types|Lahat ng uri|Todos los tipos|すべての種類|所有类型
+System specs|System specs|Especificaciones del sistema|システム仕様|系统规格
+Health check|Health check|Revisión de salud|ヘルスチェック|健康检查
+Disk health|Kalusugan ng disk|Salud del disco|ディスクの状態|磁盘健康
+Speed test|Speed test|Prueba de velocidad|速度テスト|测速
+Stress test|Stress test|Prueba de estrés|ストレステスト|压力测试
+Full check-up|Buong check-up|Chequeo completo|フルチェック|全面体检
+NO SAVED SCANS YET|Wala pang naka-save na scan|Aún no hay escaneos guardados|保存済みスキャンはありません|暂无已保存的扫描
+RUN A SCAN AND IT APPEARS HERE|Magpatakbo ng scan at lalabas ito dito|Ejecuta un escaneo y aparecerá aquí|スキャンを実行するとここに表示されます|运行一次扫描后会显示在这里
+TICK EXACTLY TWO SCANS OF THE SAME TYPE|Pumili ng eksaktong dalawang scan ng parehong uri|Marca exactamente dos escaneos del mismo tipo|同じ種類のスキャンをちょうど2つ選択|请恰好勾选两个同类型的扫描
+BEFORE|Bago|Antes|前|之前
+AFTER|Pagkatapos|Después|後|之后
+Every scan you run (specs, health, battery, disk, speed, stress) is saved here with its date. Tick two of the same kind and press Compare to see what changed.|Bawat scan na gagawin mo (specs, health, baterya, disk, speed, stress) ay naka-save dito kasama ang petsa. Pumili ng dalawa ng parehong uri at pindutin ang Compare para makita ang nagbago.|Cada escaneo que ejecutas (especificaciones, salud, batería, disco, velocidad, estrés) se guarda aquí con su fecha. Marca dos del mismo tipo y pulsa Comparar para ver qué cambió.|実行した各スキャン（仕様・診断・バッテリー・ディスク・速度・ストレス）は日付付きでここに保存されます。同じ種類を2つ選んで比較を押すと変更点が分かります。|你运行的每次扫描（规格、健康、电池、磁盘、速度、压力）都会连同日期保存在这里。勾选两个同类型扫描并点击对比即可查看变化。`;
+const RAW2=`Typing test|Typing test|Prueba de mecanografía|タイピングテスト|打字测试
+TEST COMPLETE|Tapos na ang test|Prueba completada|テスト完了|测试完成
+PROFESSIONAL SPEED|Bilis ng propesyonal|Velocidad profesional|プロ級の速さ|专业水准
+UPPER TIER|Mataas na antas|Nivel alto|上級者レベル|高水平
+KEEP PRACTICING|Magpractice pa|Sigue practicando|もっと練習しましょう|继续练习
+NEW BEST!|Bagong best!|¡Nuevo récord!|自己ベスト更新！|新纪录！
+Net WPM|Net WPM|PPM neto|実効WPM|净WPM
+Characters|Mga character|Caracteres|文字数|字符数
+Best|Best|Mejor|ベスト|最佳
+Punctuation|Punctuation|Puntuación|句読点|标点符号
+Start typing — the timer starts on your first key|Magsimulang mag-type — magsisimula ang timer sa unang key mo|Empieza a escribir — el temporizador arranca con tu primera tecla|入力を開始 — 最初のキーでタイマーが始まります|开始打字 — 首次按键时开始计时
+Words per minute over time|Words per minute sa paglipas ng oras|Palabras por minuto a lo largo del tiempo|時間ごとのWPM推移|每分钟字数变化`;
+const TR=new Map(),TRL=new Map();(RAW+'\n'+RAW2).split('\n').forEach(l=>{const a=l.split('|');TR.set(a[0],a.slice(1));TRL.set(a[0].toLowerCase(),a.slice(1))});
+const PATS=[[/^(\d+) PROBLEM\(S\) FOUND$/,['$1 problemang natagpuan','$1 problema(s) encontrado(s)','$1 件の問題が見つかりました','发现 $1 个问题']],
+[/^(\d+) ITEM\(S\) NEED ATTENTION$/,['$1 item ang kailangan ng pansin','$1 elemento(s) requieren atención','$1 件の項目に注意が必要','$1 项需要注意']],
+[/^HEALTH SCORE (\d+)\/100 — (.+)$/,['Health score $1/100 — $2','Puntuación de salud $1/100 — $2','ヘルススコア $1/100 — $2','健康评分 $1/100 — $2']],
+[/^(\d+) PROBLEM\(S\)$/,['$1 problema','$1 problema(s)','$1 件の問題','$1 个问题']],
+[/^(\d+) WARNING\(S\)$/,['$1 babala','$1 advertencia(s)','$1 件の警告','$1 条警告']],
+[/^Score (\d+)\/100 · (\d+) problem\(s\), (\d+) warning\(s\)$/,['Score $1/100 · $2 problema, $3 babala','Puntuación $1/100 · $2 problema(s), $3 advertencia(s)','スコア $1/100 · 問題 $2 件、警告 $3 件','评分 $1/100 · $2 个问题，$3 条警告']],
+[/^(\d+) enabled · (\d+) high impact(.*)$/,['$1 naka-enable · $2 mataas na impact$3','$1 activados · $2 de alto impacto$3','有効 $1 · 影響大 $2$3','已启用 $1 · 高占用 $2$3']],
+[/^Compare — (\d+) changes?$/,['Ihambing — $1 pagbabago','Comparar — $1 cambio(s)','比較 — 変更 $1 件','对比 — $1 处更改']],
+[/^(.+) — COMPLETE$/,['$1 — tapos na','$1 — completado','$1 — 完了','$1 — 完成']],
+[/^(\d+) pending: (.*)$/,['$1 nakabinbin: $2','$1 pendientes: $2','保留中 $1 件: $2','$1 个待安装: $2']]];
+let lang='en';try{lang=localStorage.getItem('dg_lang')||''}catch(e){}
+if(!LANGS[lang]){const n=(navigator.language||'en').toLowerCase();lang=/^(fil|tl)/.test(n)?'fil':n.startsWith('es')?'es':n.startsWith('ja')?'ja':n.startsWith('zh')?'zh':'en'}
+document.documentElement.lang=lang;
+const LOC=()=>LOCALES[lang];
+function patt(s){for(const p of PATS){const m=p[0].exec(s);if(m)return p[1][LIDX[lang]].replace(/\$(\d)/g,(_,k)=>tr(m[k]))}return null}
+function tr(en){if(lang==='en')return en;const i=LIDX[lang],r=TR.get(en)||TRL.get(en.toLowerCase());let t=(r&&r[i])||patt(en);
+ if(!t)return en;if((lang==='fil'||lang==='es')&&en===en.toUpperCase()&&/[A-Z]/.test(en))t=t.toUpperCase();return t}
+const SKIPN=new Set(['SCRIPT','STYLE','TEXTAREA','NOSCRIPT']),AT=['placeholder','title','aria-label'];
+function xText(n){const p=n.parentNode;if(!p||SKIPN.has(p.nodeName)||(p.closest&&p.closest('[data-notr]')))return;
+ const v=n.nodeValue;if(n.__t===undefined||v!==n.__t)n.__o=v;const o=n.__o,k=o.trim();let out=o;
+ if(lang!=='en'&&k){const t=tr(k);if(t!==k)out=o.replace(k,()=>t)}n.__t=out;if(v!==out)n.nodeValue=out}
+function xAttrs(el){if(!el.getAttribute||(el.closest&&el.closest('[data-notr]')))return;
+ for(const a of AT){const v=el.getAttribute(a);if(v==null)continue;const s=el.__a||(el.__a={}),st=s[a],o=(st&&v===st.t)?st.o:v,k=o.trim(),out=(lang==='en'||!k)?o:tr(k);s[a]={o,t:out};if(v!==out)el.setAttribute(a,out)}}
+function xRoot(r){if(r.nodeType===3){xText(r);return}if(r.nodeType!==1||r.closest('[data-notr]'))return;xAttrs(r);r.querySelectorAll('[placeholder],[title],[aria-label]').forEach(xAttrs);
+ const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT),l=[];let n;while(n=w.nextNode())l.push(n);l.forEach(xText)}
+const mo=new MutationObserver(ms=>{if(lang==='en')return;for(const m of ms){if(m.type==='characterData')xText(m.target);else m.addedNodes.forEach(xRoot)}mo.takeRecords()});
+mo.observe(document.body,{childList:true,subtree:true,characterData:true});
+const quiet=f=>{f();mo.takeRecords()};
+function translateAll(){quiet(()=>xRoot(document.body))}
+const applyLang=translateAll;
+const TABEN={home:'Dashboard',keyboard:'Keyboard',typing:'Typing',mouse:'Mouse',monitor:'Monitor',audio:'Audio',mic:'Mic',system:'System',drivers:'Drivers',startup:'Startup',live:'Live',stress:'Stress',battery:'Battery',disk:'Disk',health:'Health',network:'Network',speed:'Speed',history:'History'};
+const tabLabel=t=>tr(TABEN[t])+' '+TABEN[t];
+const tabs=['home','keyboard','typing','mouse','monitor','audio','mic','system','drivers','live','stress','battery','disk','health','startup','network','speed','history'];
+const ICONS={home:'<path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',keyboard:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',typing:'<path d="M4 7V5h16v2M12 5v14M9 19h6"/>',mouse:'<rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/>',monitor:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',audio:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/>',system:'<rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',drivers:'<path d="M8 2v6M16 2v6"/><rect x="5" y="8" width="14" height="7" rx="1"/><path d="M12 15v7"/>',startup:'<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>',live:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',stress:'<path d="M12 2s5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3 1-6 1-9z"/>',battery:'<rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 11v2M6 10v4M10 10v4"/>',disk:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',health:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/>',network:'<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 20h.01"/>',speed:'<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/>',history:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+const svg=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+ICONS[k]+'</svg>';
+const GROUPS=[['Overview',['home']],['Input',['keyboard','typing','mouse']],['Display & sound',['monitor','audio','mic']],['System',['system','drivers','startup']],['Monitoring',['live','stress']],['Health',['battery','disk','health']],['Network',['network','speed']],['Records',['history']]];
+const DESC={home:'One-click check-up and shortcuts to every tool.',keyboard:'Test every key, ghosting and N-key rollover.',typing:'Measure your typing speed and accuracy.',mouse:'Check buttons, scroll wheel, double-clicks and click speed.',monitor:'Refresh rate, dead pixels, color and banding tests.',audio:'Speaker channels, sweep, bass and phase tests.',mic:'Input level, clipping, noise floor and waveform.',system:'Full specs of your computer, from CPU to BIOS.',drivers:'Every installed driver with its version and date.',startup:'Programs that start with Windows and what they cost.',live:'Real-time CPU, memory, disk, network and temperature.',stress:'CPU and GPU load test with a thermal safety stop.',battery:'Capacity, wear, cycle count and charge rate.',disk:'SSD and hard drive health, temperature and life left.',health:'Updates, firewall, antivirus and disk space check.',network:'IP, DNS, Wi-Fi signal and ping to common servers.',speed:'Download, upload, latency and jitter test.',history:'Saved scans with dates, and a before/after compare.'};
+const GN={};GROUPS.forEach(g=>g[1].forEach(t=>GN[t]=g[0]));
+(function(){const nav=$('#nav');GROUPS.forEach(g=>{const h=document.createElement('div');h.className='ng';h.textContent=g[0];nav.appendChild(h);
+ g[1].forEach(t=>{const b=document.createElement('button');b.className='ni';b.id='tab-'+t;b.dataset.tab=t;b.title=TABEN[t];b.innerHTML=svg(t)+'<span>'+TABEN[t]+'</span><i class="dotl"></i>';b.onclick=()=>show(t);nav.appendChild(b)})})})();
+function show(t){tabs.forEach(x=>{$('#'+x).classList.toggle('on',x===t);$('#tab-'+x).classList.toggle('on',x===t)});if(t!=='audio')stopTone()}
+
+// KEYBOARD
+const L=[[['Escape','Esc'],'F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12',['Delete','Del']],
+[['Backquote','`'],...'1234567890'.split('').map(d=>['Digit'+d,d]),['Minus','-'],['Equal','='],['Backspace','Bksp',2]],
+[['Tab','Tab',1.5],...'QWERTYUIOP'.split(''),['BracketLeft','['],['BracketRight',']'],['Backslash','\\',1.5]],
+[['CapsLock','Caps',1.8],...'ASDFGHJKL'.split(''),['Semicolon',';'],['Quote',"'"],['Enter','Enter',2.2]],
+[['ShiftLeft','Shift',2.3],...'ZXCVBNM'.split(''),['Comma',','],['Period','.'],['Slash','/'],['ShiftRight','Shift',2.7]],
+[['ControlLeft','Ctrl',1.4],['MetaLeft','Win',1.2],['AltLeft','Alt',1.2],['Space','Space',6],['AltRight','Alt',1.2],['ControlRight','Ctrl',1.4],['ArrowLeft','←'],['ArrowUp','↑'],['ArrowDown','↓'],['ArrowRight','→']]];
+const keyEl={},held=new Set(),tested=new Set();let kmax=0;
+L.forEach(r=>{const d=document.createElement('div');d.className='krow';r.forEach(k=>{if(typeof k==='string')k=[/^[A-Z]$/.test(k)?'Key'+k:k,k];const e=document.createElement('div');e.className='k';e.style.setProperty('--w',k[2]||1);e.textContent=k[1];keyEl[k[0]]=e;d.appendChild(e)});$('#kb').appendChild(d)});
+function kUpd(){$('#kNow').textContent=held.size;$('#kMax').textContent=kmax;$('#kTested').textContent=tested.size}
+addEventListener('keydown',e=>{if(!$('#keyboard').classList.contains('on')||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;e.preventDefault();$('#kLast').textContent=e.key===' '?'Space':e.key;$('#kCode').textContent=e.code;held.add(e.code);tested.add(e.code);kmax=Math.max(kmax,held.size);const el=keyEl[e.code];if(el)el.classList.add('d','t');kUpd()});
+addEventListener('keyup',e=>{held.delete(e.code);const el=keyEl[e.code];if(el)el.classList.remove('d');kUpd()});
+addEventListener('blur',()=>{held.clear();$$('.k.d').forEach(e=>e.classList.remove('d'));kUpd()});
+$('#kReset').onclick=()=>{held.clear();tested.clear();kmax=0;$$('.k').forEach(e=>e.classList.remove('d','t'));kUpd()};
+
+// MOUSE
+let clicks=0,dbl=0,stamps=[];const pad=$('#pad');
+pad.oncontextmenu=e=>e.preventDefault();
+pad.onmousemove=e=>{const r=pad.getBoundingClientRect();$('#mPos').textContent=Math.round(e.clientX-r.left)+', '+Math.round(e.clientY-r.top)};
+pad.onmousedown=e=>{e.preventDefault();const b=$(`#mb [data-b="${e.button}"]`);if(b)b.classList.add('d');clicks++;const n=performance.now();stamps=stamps.filter(t=>n-t<1000);stamps.push(n);$('#mClicks').textContent=clicks;$('#mCps').textContent=stamps.length};
+addEventListener('mouseup',e=>{const b=$(`#mb [data-b="${e.button}"]`);if(b)b.classList.remove('d')});
+pad.ondblclick=()=>{dbl++;$('#mDbl').textContent=dbl};
+pad.onwheel=e=>{e.preventDefault();$('#mWheel').textContent=Math.round(e.deltaY)+(e.deltaY<0?' ↑':' ↓')};
+$('#mReset').onclick=()=>{clicks=dbl=0;stamps=[];['#mClicks','#mDbl','#mCps'].forEach(s=>$(s).textContent=0);$('#mWheel').textContent=0};
+
+// MONITOR
+const cols=['#000','#fff','#f00','#0f0','#00f','#808080'],names=['Black','White','Red','Green','Blue','Gray'];
+let ci=0;const fs=$('#fs');
+names.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{ci=i;fs.style.background=cols[i];fs.style.display='block';fs.requestFullscreen&&fs.requestFullscreen().catch(()=>{})};$('#colors').appendChild(b)});
+fs.onclick=()=>{ci++;if(ci>=cols.length){exitFs();return}fs.style.background=cols[ci]};
+function exitFs(){fs.style.display='none';document.fullscreenElement&&document.exitFullscreen()}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)fs.style.display='none'});
+addEventListener('keydown',e=>{if(e.key==='Escape')exitFs()});
+$('#res').textContent=screen.width*devicePixelRatio+'×'+screen.height*devicePixelRatio;
+const gcd=(a,b)=>b?gcd(b,a%b):a,g=gcd(screen.width,screen.height);$('#ratio').textContent=screen.width/g+':'+screen.height/g;
+$('#depth').textContent=screen.colorDepth+'-bit';
+let last=0,ds=[];const mc=$('#mon');
+function frame(t){if(last){const d=t-last;ds.push(d);if(ds.length>120)ds.shift()}last=t;
+ if($('#monitor').classList.contains('on')&&ds.length>10){const avg=ds.reduce((a,b)=>a+b)/ds.length;$('#pace').textContent=avg.toFixed(2);$('#hz').textContent=Math.round(1000/avg);$('#stut').textContent=ds.filter(d=>d>avg*1.5).length;
+  const c=mc.getContext('2d');mc.width=mc.clientWidth;c.clearRect(0,0,mc.width,mc.height);c.strokeStyle=css('--fg');c.beginPath();ds.forEach((d,i)=>{const x=i/120*mc.width,y=mc.height-Math.min(d/50,1)*mc.height;i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke()}
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+
+// AUDIO
+let ctx,osc,gL,gR,timer;
+const AC=()=>ctx||(ctx=new (window.AudioContext||window.webkitAudioContext)());
+function stopTone(){clearInterval(timer);try{osc&&osc.stop()}catch(e){}osc=null;lights(0,0)}
+function lights(l,r){$('#lL').classList.toggle('d',l>.05);$('#lR').classList.toggle('d',r>.05)}
+function setG(l,r){gL.gain.value=l;gR.gain.value=r;lights(l,r)}
+function tone(f,l=1,r=1,inv=false){stopTone();const c=AC();c.resume();osc=c.createOscillator();osc.frequency.value=f;gL=c.createGain();gR=c.createGain();const m=c.createChannelMerger(2),v=c.createGain();v.gain.value=.2;osc.connect(gL);osc.connect(gR);gL.connect(m,0,0);gR.connect(m,0,1);m.connect(v).connect(c.destination);setG(l,inv?-r:r);if(inv)lights(1,1);osc.start()}
+$$('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t;tone(440,t!=='R'?1:0,t!=='L'?1:0)});
+const panSet=p=>{setG((1-p)/2+.0,(1+p)/2);$('#panV').textContent=p.toFixed(1)};
+$('#pan').oninput=e=>{if(!osc||timer)tone(440);clearInterval(timer);timer=null;panSet(e.target.value/100)};
+$('#sweep').onclick=()=>{tone(440);const t0=performance.now();timer=setInterval(()=>{const p=Math.sin((performance.now()-t0)/1000*1.5);panSet(p);$('#pan').value=p*100},30)};
+$$('[data-f]').forEach(b=>b.onclick=()=>tone(+b.dataset.f));
+$('#bass').onclick=()=>{tone(20);osc.frequency.linearRampToValueAtTime(250,AC().currentTime+10)};
+const fqv=()=>Math.round(20*Math.pow(1000,$('#fq').value/1000));
+const fqShow=()=>$('#fqV').textContent=fqv()+' Hz';fqShow();
+$('#fq').oninput=()=>{fqShow();if(osc)osc.frequency.value=fqv()};
+$('#fqGo').onclick=()=>tone(fqv());
+$$('[data-p]').forEach(b=>b.onclick=()=>tone(200,1,1,b.dataset.p==='1'));
+$('#stop').onclick=stopTone;
+
+// MIC
+let an,stream,micOn=false,nfT=0,nfVals=[];
+const db=v=>v>1e-5?(20*Math.log10(v)).toFixed(1):'-∞';
+$('#micGo').onclick=async()=>{
+ if(micOn){stream.getTracks().forEach(t=>t.stop());micOn=false;$('#micGo').textContent='Start microphone';return}
+ try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}catch(e){$('#nf').textContent='DENIED';return}
+ const c=AC();await c.resume();an=c.createAnalyser();an.fftSize=2048;c.createMediaStreamSource(stream).connect(an);
+ micOn=true;$('#micGo').textContent='Stop microphone';
+ $('#ch').textContent=stream.getAudioTracks()[0].getSettings().channelCount||1;$('#lat').textContent=((c.baseLatency||0)*1000).toFixed(1);micLoop()};
+$('#noise').onclick=()=>{if(!micOn)return;nfVals=[];nfT=performance.now()+3000;$('#nf').textContent='STAY QUIET'};
+function micLoop(){if(!micOn)return;
+ const w=new Float32Array(an.fftSize),f=new Uint8Array(an.frequencyBinCount);an.getFloatTimeDomainData(w);an.getByteFrequencyData(f);
+ let s=0,p=0;w.forEach(x=>{s+=x*x;p=Math.max(p,Math.abs(x))});const rms=Math.sqrt(s/w.length);
+ $('#rms').textContent=db(rms);$('#peak').textContent=db(p);$('#clip').classList.toggle('on',p>=.99);
+ if(nfT){nfVals.push(rms);if(performance.now()>nfT){nfT=0;const a=nfVals.reduce((x,y)=>x+y)/nfVals.length,d=20*Math.log10(a||1e-6);$('#nf').textContent=d.toFixed(0)+' dB '+(d<-60?'GOOD':d<-45?'OK':'NOISY')}}
+ draw($('#wave'),w,true);draw($('#spec'),f,false);requestAnimationFrame(micLoop)}
+function draw(cv,d,wave){cv.width=cv.clientWidth;cv.height=cv.clientHeight;const c=cv.getContext('2d'),W=cv.width,H=cv.height;c.strokeStyle=c.fillStyle=css('--fg');
+ if(wave){c.beginPath();for(let i=0;i<d.length;i+=2){const x=i/d.length*W,y=H/2-d[i]*H/2;i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()}
+ else{const n=Math.min(d.length,256),bw=W/n;for(let i=0;i<n;i++)c.fillRect(i*bw,H-d[i]/255*H,Math.max(bw-1,1),d[i]/255*H)}}
+// TYPING
+const W='the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us'.split(' ');
+let tx='',tp=0,tSp=[],tSt=[],tStart=0,tTimer=null,tDur=30,tKeys=0,tGood=0,tOk=0,tDone=false,tPunct=false,tWs=[],tLast=0;
+function tWord(first){let w=W[Math.random()*W.length|0];if(tPunct){if(first||Math.random()<.12)w=w[0].toUpperCase()+w.slice(1);const r=Math.random();if(r<.08)w+=',';else if(r<.14)w+='.';else if(r<.16)w+='?';else if(r<.2)w='"'+w+'"'}return w}
+function tAppend(n){const fr=document.createDocumentFragment();let add='';
+ for(let k=0;k<n;k++){const w=tWord(!tx&&k===0)+' ';add+=w;const el=document.createElement('span');el.className='wd';
+  for(const ch of w){const sp=document.createElement('span');sp.className='c';sp.textContent=ch;el.appendChild(sp);tSp.push(sp)}fr.appendChild(el)}
+ $('#tText').appendChild(fr);tx+=add}
+function tReset(){clearInterval(tTimer);tTimer=null;tx='';tSp=[];tSt=[];tp=0;tOk=0;tStart=0;tKeys=0;tGood=0;tDone=false;tWs=[];tLast=0;
+ const b=$('#tText');b.innerHTML='';b.scrollTop=0;b.classList.remove('act');tAppend(80);tSp[0].classList.add('cur');$('#tRes').innerHTML='';$('#tHint').style.visibility='visible';tStats()}
+function tStats(){const el=tStart?Math.min(tDur,(performance.now()-tStart)/1000):0,mins=Math.max(el,3)/60;
+ $('#tTime').textContent=Math.max(0,Math.ceil(tDur-el));$('#tWpm').textContent=tStart?Math.round(tOk/5/mins):0;$('#tRaw').textContent=tStart?Math.round(tp/5/mins):0;
+ $('#tAcc').textContent=(tKeys?Math.round(tGood/tKeys*100):100)+'%';$('#tErr').textContent=tKeys-tGood}
+function tRun(){tStart=performance.now();tLast=0;tWs=[];tTimer=setInterval(tTick,100);$('#tHint').style.visibility='hidden';$('#tText').classList.add('act')}
+function tTick(){const el=(performance.now()-tStart)/1000;tStats();const sec=Math.floor(el);if(sec>tLast&&sec<=tDur){tLast=sec;tWs.push(Math.round(tOk/5/(Math.max(el,1)/60)))}if(el>=tDur)tFinish()}
+function tGraph(){const cv=$('#tGraph');if(!cv)return;cv.width=cv.clientWidth;cv.height=cv.clientHeight;const c=cv.getContext('2d'),w=cv.width,h=cv.height,a=tWs,m=Math.max(10,...a)*1.2;
+ c.strokeStyle=css('--line');c.lineWidth=1;for(let k=1;k<4;k++){c.beginPath();c.moveTo(0,h*k/4);c.lineTo(w,h*k/4);c.stroke()}
+ c.strokeStyle=css('--fg');c.lineWidth=2;c.beginPath();a.forEach((v,k)=>{const x=a.length>1?k/(a.length-1)*w:0,y=h-v/m*h;k?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();c.fillStyle=css('--dim');c.font='10px monospace';c.fillText(Math.round(m)+' WPM',4,12)}
+function tFinish(){clearInterval(tTimer);tTimer=null;tDone=true;$('#tText').classList.remove('act');const mn=tDur/60,wpm=Math.round(tOk/5/mn),raw=Math.round(tp/5/mn),acc=tKeys?Math.round(tGood/tKeys*100):100;
+ $('#tWpm').textContent=wpm;$('#tRaw').textContent=raw;$('#tAcc').textContent=acc+'%';$('#tTime').textContent=0;
+ let best=0;try{best=+localStorage.getItem('dg_best_'+tDur)||0}catch(e){}const nb=wpm>best&&wpm>0;if(nb){try{localStorage.setItem('dg_best_'+tDur,wpm)}catch(e){}}
+ const rate=wpm>=100?'PROFESSIONAL SPEED':wpm>=75?'UPPER TIER':wpm>=40?'AVERAGE':'KEEP PRACTICING';
+ $('#tRes').innerHTML=`<div class="verdict">${nb?'<span>NEW BEST!</span> — ':''}<span>${rate}</span></div><div class="stats"><div class="stat"><b>${wpm}</b><span>Net WPM</span></div><div class="stat"><b>${raw}</b><span>Raw WPM</span></div><div class="stat"><b>${acc}%</b><span>Accuracy</span></div><div class="stat"><b>${tKeys-tGood}</b><span>Errors</span></div><div class="stat"><b>${tKeys}</b><span>Characters</span></div><div class="stat"><b>${Math.max(best,wpm)}</b><span>Best</span></div></div><h2>Words per minute over time</h2><canvas id="tGraph" class="g"></canvas>`;
+ tGraph();if(window.__saveHist)window.__saveHist('typing',[['Net WPM',String(wpm)],['Raw WPM',String(raw)],['Accuracy',acc+'%'],['Errors',String(tKeys-tGood)],['Duration',tDur+' s'],['Punctuation',tPunct?'On':'Off']])}
+function tScroll(){const b=$('#tText'),c=tSp[tp];if(!c)return;const row=Math.round(c.parentNode.offsetTop/38);b.scrollTop=row<=1?0:(row-1)*38}
+$$('#tDurs button').forEach(b=>b.onclick=()=>{tDur=+b.dataset.d;$$('#tDurs button').forEach(x=>x.classList.toggle('on',x===b));b.blur();tReset()});
+$('#tNew').onclick=function(){this.blur();tReset()};
+$('#tPunct').onclick=function(){tPunct=!tPunct;this.classList.toggle('on',tPunct);this.blur();tReset()};
+addEventListener('keydown',e=>{const altgr=e.getModifierState&&e.getModifierState('AltGraph');
+ if(!$('#typing').classList.contains('on')||((e.ctrlKey||e.metaKey||e.altKey)&&!altgr)||e.isComposing||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+ if(e.key==='Tab'){e.preventDefault();tReset();return}
+ if(tDone)return;
+ const ae=document.activeElement;if(ae&&ae.tagName==='BUTTON')ae.blur();
+ if(e.key==='Backspace'){e.preventDefault();if(tp>0&&tStart){tSp[tp].classList.remove('cur');tp--;if(tSt[tp])tOk--;tSt[tp]=undefined;tSp[tp].className='c cur';tScroll()}return}
+ if(e.key.length!==1)return;e.preventDefault();
+ if(!tStart)tRun();
+ const ok=e.key===tx[tp];tSp[tp].className='c '+(ok?'ok':'bad');tSt[tp]=ok?1:0;tKeys++;if(ok){tGood++;tOk++}tp++;tSp[tp].classList.add('cur');
+ if(tp>tx.length-150)tAppend(40);tScroll()});
+addEventListener('resize',()=>{if($('#typing').classList.contains('on'))tScroll()});
+{const _s0=show;show=function(t){if(t!=='typing'&&(tTimer||tDone))tReset();_s0(t)}}
+tReset();
+// SYSTEM + DRIVERS
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const A=x=>x==null?[]:Array.isArray(x)?x:[x];
+const gb=b=>b?(b/1073741824).toFixed(b<1e10?2:1)+' GB':'—';
+const dt=x=>{if(!x)return '—';const m=/Date\((\d+)\)/.exec(x);return m?new Date(+m[1]).toLocaleString(LOC()):x};
+const J=(...a)=>a.filter(Boolean).join(' ');
+if(!window.sys)$$('.desk').forEach(b=>b.style.display='none');
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
+let sysG=[],drv=[];
+function renderSys(){let ri=0;$('#sysOut').innerHTML=sysG.map(g=>`<h2>${esc(g.t)}</h2><table class="kv">${g.r.map(r=>`<tr style="--i:${ri++}"><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</table>`).join('')}
+function browserInfo(){const c=document.createElement('canvas').getContext('webgl');let gpu='—';if(c){const e=c.getExtension('WEBGL_debug_renderer_info');gpu=e?c.getParameter(e.UNMASKED_RENDERER_WEBGL):c.getParameter(c.RENDERER)}
+ const n=navigator;sysG=[{t:'Browser-limited info — use the desktop app (.exe) for full specs',r:[['User agent',n.userAgent],['Platform',n.platform],['CPU threads',n.hardwareConcurrency||'—'],['Memory (approx)',n.deviceMemory?n.deviceMemory+' GB':'—'],['GPU',gpu],['Screen',screen.width+'×'+screen.height+' @'+devicePixelRatio+'x'],['Language',n.language],['Timezone',Intl.DateTimeFormat().resolvedOptions().timeZone],['Network',n.connection?n.connection.effectiveType+' / '+n.connection.downlink+' Mbps':'—']]}];renderSys()}
+function buildSys(d0){try{const d=d0||{},cs=d.cs||{},o=d.os||{},b=d.bios||{},bd=d.board||{};
+ sysG=[
+ {t:'Computer',r:[['Name',cs.Name],['Manufacturer',cs.Manufacturer],['Model',cs.Model],['System type',cs.SystemType],['Motherboard',J(bd.Manufacturer,bd.Product)],['BIOS version',b.SMBIOSBIOSVersion],['BIOS date',dt(b.ReleaseDate)],['Serial number',b.SerialNumber]].filter(r=>r[1]&&r[1]!=='—')},
+ {t:'Operating system',r:[['Name',o.Caption],['Version',o.Version],['Build',o.BuildNumber],['Architecture',o.OSArchitecture],['Installed',dt(o.InstallDate)],['Last boot',dt(o.LastBootUpTime)]].filter(r=>r[1]&&r[1]!=='—')},
+ {t:'Processor',r:A(d.cpu).flatMap(c=>[['Model',c.Name],['Cores / threads',(c.NumberOfCores||'?')+' / '+(c.NumberOfLogicalProcessors||'?')],['Max clock',c.MaxClockSpeed?c.MaxClockSpeed+' MHz':'—']])},
+ {t:'Memory',r:[['Total',gb(cs.TotalPhysicalMemory)],...A(d.ram).map((m,i)=>['Slot '+(i+1)+' '+(m.BankLabel||''),gb(m.Capacity)+' • '+(m.Speed||'?')+' MHz • '+J(m.Manufacturer,m.PartNumber)])]},
+ {t:'Graphics',r:A(d.gpu).flatMap(g=>[['Adapter',g.Name],['Driver version',g.DriverVersion],['Resolution',g.CurrentHorizontalResolution?g.CurrentHorizontalResolution+'×'+g.CurrentVerticalResolution+' @ '+g.CurrentRefreshRate+' Hz':'—']])},
+ {t:'Storage',r:[...A(d.disk).map(x=>[x.Model,gb(x.Size)+' • '+J(x.InterfaceType,x.MediaType)]),...A(d.vol).map(v=>['Drive '+v.DeviceID,gb(v.FreeSpace)+' free of '+gb(v.Size)+' ('+v.FileSystem+')'])]},
+ {t:'Network',r:A(d.net).map(n=>[n.Description,J(A(n.IPAddress).join(', '),'• '+n.MACAddress)])},
+ {t:'Battery',r:A(d.bat).map(x=>[x.Name||'Battery',x.EstimatedChargeRemaining+'% charge'])}
+ ].filter(g=>g.r.length);renderSys()}catch(e){$('#sysOut').innerHTML='<p>Scan failed: '+esc(e.message)+'</p>'}}
+function renderDrv(){const q=$('#drvQ').value.toLowerCase(),rows=drv.filter(x=>!q||J(x.DeviceName,x.DeviceClass,x.Manufacturer,x.DriverVersion).toLowerCase().includes(q));
+ $('#drvCount').textContent=rows.length+' / '+drv.length;
+ $('#drvOut').innerHTML=rows.length?'<div style="overflow-x:auto"><table class="kv dr"><tr><th>Device</th><th>Class</th><th>Manufacturer</th><th>Version</th><th>Date</th></tr>'+rows.map((x,i)=>`<tr style="--i:${Math.min(i,25)}"><td>${esc(x.DeviceName)}</td><td>${esc(x.DeviceClass)}</td><td>${esc(x.Manufacturer)}</td><td>${esc(x.DriverVersion)}</td><td>${esc(x.DriverDate)}</td></tr>`).join('')+'</table></div>':'<p>No drivers to show.</p>'}
+const SYSM=['Initializing diagnostic engine','Reading BIOS & firmware','Probing motherboard','Identifying processor','Enumerating memory modules','Querying graphics adapters','Scanning storage volumes','Mapping network interfaces','Checking battery state','Compiling report'];
+const DRVM=['Initializing driver scanner','Reading driver store','Enumerating PnP devices','Verifying signatures','Resolving versions & dates','Sorting by device class','Compiling driver list'];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms)),REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;let busy=false;
+async function scanFx(box,label,msgs,work){
+ box.classList.remove('rev');
+ box.innerHTML=`<div class="ld"><div class="ld-top"><span>${label}</span><span class="ld-t">T+00.0s</span></div><div class="ld-pct">0%</div><div class="ld-bar"><i></i></div><div class="ld-log"></div></div>`;
+ const ld=box.firstChild,pct=ld.querySelector('.ld-pct'),fill=ld.querySelector('.ld-bar i'),log=ld.querySelector('.ld-log'),tm=ld.querySelector('.ld-t'),lab=ld.querySelector('.ld-top span'),top=$('#topbar i');
+ let st=null;const done=work.then(v=>st={v},e=>st={e});
+ const t0=performance.now(),minMs=REDUCED?0:3200;let p=0,li=-1;
+ const upd=()=>{pct.textContent=Math.floor(p)+'%';fill.style.width=p+'%';top.style.width=p+'%';const n=Math.min(msgs.length-1,Math.floor(p/100*msgs.length));
+  while(li<n){li++;if(log.lastChild)log.lastChild.textContent+=' [OK]';const d=document.createElement('div');d.textContent='> '+msgs[li]+'…';log.appendChild(d);while(log.children.length>6)log.removeChild(log.firstChild)}};
+ upd();
+ for(;;){await sleep(33);const el=performance.now()-t0;tm.textContent='T+'+(el/1000).toFixed(1).padStart(4,'0')+'s';
+  const sprint=st&&el>=minMs,target=sprint?100:st?90*Math.min(1,el/minMs):Math.min(92,92*(1-Math.exp(-el/6000)));
+  p+=(target-p)*(sprint?.22:.1)+(sprint?.5:0);if(sprint&&p>99.4)p=100;if(p>100)p=100;upd();if(p>=100)break}
+ if(log.lastChild)log.lastChild.textContent+=' [OK]';lab.textContent=label+' — COMPLETE';ld.classList.add('done');
+ await sleep(REDUCED?0:700);top.style.width='0';await done;box.classList.add('rev');return st}
+const lock=v=>$$('#sysScan,#drvScan').forEach(b=>b.disabled=v);
+async function scanSys(){if(busy)return;busy=true;lock(true);
+ const r=await scanFx($('#sysOut'),'SYSTEM SCAN',SYSM,window.sys?window.sys.info():Promise.resolve(null));busy=false;lock(false);
+ if(r.e){$('#sysOut').innerHTML='<div class="empty">SCAN FAILED<br><small>'+esc(r.e.message)+'</small></div>';return}
+ window.sys?buildSys(r.v):browserInfo()}
+async function scanDrv(){if(busy)return;busy=true;lock(true);
+ const r=await scanFx($('#drvOut'),'DRIVER SCAN',DRVM,window.sys?window.sys.drivers():Promise.resolve(null));busy=false;lock(false);
+ if(r.e){$('#drvOut').innerHTML='<div class="empty">SCAN FAILED<br><small>'+esc(r.e.message)+'</small></div>';return}
+ if(!window.sys){$('#drvOut').innerHTML='<div class="empty">DESKTOP APP ONLY<br><small>THE WEB VERSION CANNOT READ YOUR DRIVERS — USE THE .EXE</small></div>';return}
+ drv=A(r.v);renderDrv()}
+$('#sysScan').onclick=scanSys;$('#drvScan').onclick=scanDrv;$('#drvQ').oninput=()=>{$('#drvOut').classList.remove('rev');renderDrv()};
+$('#tab-system').addEventListener('click',()=>{if(!sysG.length)scanSys()});
+$('#tab-drivers').addEventListener('click',()=>{if(!drv.length)scanDrv()});
+if(window.sys){
+ $('#sysExp').onclick=()=>dl('system-specs.txt',sysG.map(g=>g.t.toUpperCase()+'\n'+g.r.map(r=>'  '+r[0]+': '+r[1]).join('\n')).join('\n\n'),'text/plain');
+ $('#drvExp').onclick=()=>{const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';dl('drivers.csv',['Device,Class,Manufacturer,Version,Date,Inf,Signed'].concat(drv.map(x=>[x.DeviceName,x.DeviceClass,x.Manufacturer,x.DriverVersion,x.DriverDate,x.InfName,x.IsSigned].map(q).join(','))).join('\n'),'text/csv')};
+ $('#drvUp').onclick=()=>window.sys.open('update');$('#drvDm').onclick=()=>window.sys.open('devmgmt');$('#sysDx').onclick=()=>window.sys.open('dxdiag');
+}
+const clk=()=>$('#clock').textContent=new Date().toLocaleTimeString(LOC(),{hour12:false});clk();setInterval(clk,1000);
+// ===================== v2: monitoring, health, network, history =====================
+(function(){
+const sys=window.sys,call=(n,a)=>sys?sys.call(n,a):Promise.reject(new Error('desktop app only'));
+const fail=e=>'<div class="empty">'+(sys?'SCAN FAILED':'DESKTOP APP ONLY')+'<br><small>'+esc(String((e&&e.message)||e).toUpperCase())+'</small></div>';
+const deskOnly='<div class="empty">DESKTOP APP ONLY<br><small>OPEN DIAGONE.EXE FOR THIS FEATURE</small></div>';
+const elevate=()=>call('elevate').catch(()=>{});
+const hr=(st,t,d)=>`<div class="hrow"><div><b>${esc(t)}</b><small>${esc(d)}</small></div><b>${st==='ok'?'✓':st==='warn'?'!':'✗'}</b></div>`;
+const lockScan=async(box,label,msgs,work)=>{if(busy)return null;busy=true;try{return await scanFx(box,label,msgs,work)}finally{busy=false}};
+const enter={},ago=()=>{};
+
+// ---- history ----
+const HK='dg_hist';let hist=[];try{hist=JSON.parse(localStorage.getItem(HK)||'[]')}catch(e){}
+const HT={typing:'Typing test',checkup:'Full check-up',system:'System specs',health:'Health check',battery:'Battery',disk:'Disk health',speed:'Speed test',stress:'Stress test'};
+function saveHist(type,rows){if(!sys&&type!=='speed'&&type!=='typing')return;const lb=$('#hsLabel').value.trim();hist.unshift({id:Date.now()+Math.random().toString(36).slice(2,5),type,label:lb,date:new Date().toISOString(),rows});hist=hist.slice(0,200);try{localStorage.setItem(HK,JSON.stringify(hist))}catch(e){}}
+window.__saveHist=saveHist;
+$('#hsType').innerHTML='<option value="">All types</option>'+Object.keys(HT).map(k=>`<option value="${k}">${HT[k]}</option>`).join('');
+let hsView=null;
+function renderHist(){const f=$('#hsType').value,list=hist.filter(h=>!f||h.type===f);
+ $('#hsOut').innerHTML=(hsView||'')+(list.length?list.map(h=>`<div class="hist"><input type="checkbox" data-id="${h.id}"><span>${esc(HT[h.type]||h.type)}${h.label?' — '+esc(h.label):''}<small>${esc(new Date(h.date).toLocaleString(LOC()))}</small></span><button data-v="${h.id}">View</button><button data-d="${h.id}">Delete</button></div>`).join(''):'<div class="empty">NO SAVED SCANS YET<br><small>RUN A SCAN AND IT APPEARS HERE</small></div>')}
+const saveAll=()=>{try{localStorage.setItem(HK,JSON.stringify(hist))}catch(e){}};
+$('#hsOut').addEventListener('click',e=>{const v=e.target.closest('[data-v]'),d=e.target.closest('[data-d]');
+ if(v){const h=hist.find(x=>x.id===v.dataset.v);hsView=`<h2>${esc(HT[h.type]||h.type)} — ${esc(new Date(h.date).toLocaleString(LOC()))}</h2><table class="kv">${h.rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</table>`;renderHist()}
+ if(d){hist=hist.filter(x=>x.id!==d.dataset.d);saveAll();hsView=null;renderHist()}});
+$('#hsType').onchange=()=>{hsView=null;renderHist()};
+$('#hsClr').onclick=()=>{if(confirm('Delete all saved scans?')){hist=[];saveAll();hsView=null;renderHist()}};
+$('#hsCmp').onclick=()=>{const ids=$$('#hsOut input:checked').map(c=>c.dataset.id),sel=ids.map(i=>hist.find(h=>h.id===i));
+ if(sel.length!==2||sel[0].type!==sel[1].type){hsView='<div class="verdict">TICK EXACTLY TWO SCANS OF THE SAME TYPE</div>';renderHist();return}
+ const [b,a]=sel.sort((x,y)=>new Date(x.date)-new Date(y.date)),m=new Map(a.rows),keys=[...new Set([...b.rows.map(r=>r[0]),...a.rows.map(r=>r[0])])],bm=new Map(b.rows);
+ const rows=keys.map(k=>[k,bm.get(k)||'—',m.get(k)||'—']),ch=rows.filter(r=>r[1]!==r[2]).length;
+ hsView=`<h2>Compare — ${ch} change${ch===1?'':'s'}</h2><table class="kv"><tr><td></td><td><b>BEFORE</b> ${esc(b.label||new Date(b.date).toLocaleDateString(LOC()))}</td><td><b>AFTER</b> ${esc(a.label||new Date(a.date).toLocaleDateString(LOC()))}</td></tr>${rows.map(r=>`<tr class="${r[1]===r[2]?'same':'chg'}"><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}${r[1]!==r[2]?' ≠':''}</td></tr>`).join('')}</table>`;renderHist()};
+enter.history=()=>{hsView=null;renderHist()};
+// auto-save system specs scan
+const _rs=renderSys;renderSys=function(){_rs();if(sys&&sysG.length)saveHist('system',sysG.flatMap(g=>g.r.map(r=>[g.t+' › '+r[0],r[1]])))};
+
+// ---- live monitor ----
+const MAXP=90,S={cpu:[],ram:[],disk:[],rx:[],tx:[],temp:[]};let cur={},want={live:false,stress:false},running=false,seen=0;
+const push=(a,v)=>{a.push(v);if(a.length>MAXP)a.shift()};
+function syncLive(){const n=want.live||want.stress;$('#tab-live').classList.toggle('live',want.live);$('#tab-stress').classList.toggle('live',want.stress);if(n&&!running){running=true;call('liveStart').catch(()=>{running=false})}else if(!n&&running){running=false;call('liveStop').catch(()=>{})}}
+function graph(cv,arrs,fixed){cv.width=cv.clientWidth;cv.height=cv.clientHeight;const c=cv.getContext('2d'),W=cv.width,H=cv.height;c.strokeStyle=css('--line');c.lineWidth=1;
+ for(let i=1;i<4;i++){c.beginPath();c.moveTo(0,H*i/4);c.lineTo(W,H*i/4);c.stroke()}
+ const vals=arrs.flat().filter(v=>v!=null),m=fixed||Math.max(1,...vals)*1.2;
+ arrs.forEach((a,k)=>{c.strokeStyle=css('--fg');c.setLineDash(k?[4,4]:[]);c.lineWidth=k?1:2;c.beginPath();let st=false;
+  a.forEach((v,i)=>{if(v==null){st=false;return}const x=i/(MAXP-1)*W,y=H-Math.min(v/m,1)*H;st?c.lineTo(x,y):c.moveTo(x,y);st=true});c.stroke()});
+ c.setLineDash([]);c.fillStyle=css('--dim');c.font='10px "Roboto Mono",monospace';c.fillText(Math.round(m)+'',4,12)}
+function onLive(d){cur=d;const rp=d.ramUsed/d.ramTotal*100,dk=d.dt==null?null:Math.min(100,d.dt),rx=d.rx==null?null:d.rx*8/1e6,tx=d.tx==null?null:d.tx*8/1e6;
+ push(S.cpu,d.cpu);push(S.ram,rp);push(S.disk,dk);push(S.rx,rx);push(S.tx,tx);push(S.temp,d.temp==null?null:d.temp);
+ if(++seen===6&&d.temp==null&&$('#lvNote'))$('#lvNote').textContent='No temperature sensor is exposed by this PC. Some PCs only show it when DiagOne runs as administrator.';
+ if(!$('#live').classList.contains('on'))return;
+ $('#lvCpu').textContent=d.cpu.toFixed(0)+'%';$('#lvRam').textContent=Math.round(rp)+'% · '+gb(d.ramUsed);$('#lvDisk').textContent=dk==null?'—':Math.round(dk)+'%';
+ $('#lvSpace').textContent=d.space?Math.round(d.space.used/d.space.total*100)+'% · '+gb(d.space.total):'—';
+ $('#lvNet').textContent=rx==null?'—':rx.toFixed(1)+' / '+tx.toFixed(1);$('#lvTemp').textContent=d.temp==null?'N/A':d.temp.toFixed(0)+'°C';
+ graph($('#gCpu'),[S.cpu],100);graph($('#gRam'),[S.ram],100);graph($('#gDisk'),[S.disk],100);graph($('#gNet'),[S.rx,S.tx]);graph($('#gTemp'),[S.temp],110)}
+if(sys)sys.onLive(onLive);
+$('#lvToggle').onclick=()=>{want.live=!want.live;$('#lvToggle').textContent=want.live?'Pause':'Resume';syncLive()};
+$('#lvAdm').onclick=elevate;$('#dkAdm').onclick=elevate;
+enter.live=()=>{if(!sys){$('#lvNote').textContent='Desktop app only — the live monitor reads your real CPU, disk, network and temperature.';return}want.live=true;$('#lvToggle').textContent='Pause';syncLive()};
+
+// ---- stress test ----
+const GLSRC='#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nuniform float t;uniform vec2 r;\nfloat h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}\nfloat fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<6;i++){v+=a*n(p);p=p*2.02+vec2(1.7,9.2);a*=.5;}return v;}\nvoid main(){vec2 q=gl_FragCoord.xy/r*6.;float x=0.;for(int k=0;k<5;k++){x+=fbm(q+vec2(t*.2*float(k+1),t*.1)+fbm(q*1.3-t*.15));q+=1.3;}x/=5.;gl_FragColor=vec4(vec3(smoothstep(.35,.75,x)),1.);}';
+const WCODE='let x=1.1,c=0;function run(){const end=performance.now()+200;while(performance.now()<end){for(let i=0;i<20000;i++){x=Math.sqrt(x*x+i)%7+Math.sin(x)*Math.cos(x);c++}}postMessage(c);c=0;setTimeout(run,0)}run()';
+let sx={run:false,w:[],iv:0,raf:0,ops:0,frames:0,series:[],opsS:[],fpsS:[],max:0,t0:0,dur:60,lim:95,mode:'both'};
+function glLoop(cv){const gl=cv.getContext('webgl');if(!gl)return null;const mk=(ty,src)=>{const o=gl.createShader(ty);gl.shaderSource(o,src);gl.compileShader(o);return o};
+ const pg=gl.createProgram();gl.attachShader(pg,mk(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pg,mk(gl.FRAGMENT_SHADER,GLSRC));gl.linkProgram(pg);if(!gl.getProgramParameter(pg,gl.LINK_STATUS))return null;
+ gl.useProgram(pg);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);const l=gl.getAttribLocation(pg,'p');gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0);
+ gl.viewport(0,0,cv.width,cv.height);const ut=gl.getUniformLocation(pg,'t');gl.uniform2f(gl.getUniformLocation(pg,'r'),cv.width,cv.height);const t0=performance.now();
+ const f=now=>{if(!sx.run)return;gl.uniform1f(ut,(now-t0)/1000);gl.drawArrays(gl.TRIANGLES,0,3);gl.finish();sx.frames++;sx.raf=requestAnimationFrame(f)};sx.raf=requestAnimationFrame(f);return true}
+async function sxStart(){if(sx.run)return;
+ if(!sys){$('#sxRes').innerHTML=deskOnly;return}
+ sx=Object.assign(sx,{run:true,w:[],ops:0,frames:0,series:[],opsS:[],fpsS:[],max:0,mode:$('#sxMode').value,dur:+$('#sxDur').value,lim:+$('#sxLim').value});
+ want.stress=true;syncLive();$('#sxRes').innerHTML='<p>Reading temperature sensor…</p>';$('#sxGo').disabled=true;
+ await new Promise(r=>setTimeout(r,2500));$('#sxRes').innerHTML='';
+ const noTemp=cur.temp==null;if(noTemp)sx.dur=Math.min(sx.dur,60);
+ if(sx.mode!=='gpu'){const url=URL.createObjectURL(new Blob([WCODE],{type:'text/javascript'}));for(let i=0;i<(navigator.hardwareConcurrency||4);i++){const w=new Worker(url);w.onmessage=e=>{sx.ops+=e.data};sx.w.push(w)}}
+ const cv=$('#sxGl');if(sx.mode!=='cpu'){cv.style.display='block';if(!glLoop(cv))cv.style.display='none'}
+ sx.t0=performance.now();let el=0;
+ sx.iv=setInterval(()=>{el=Math.round((performance.now()-sx.t0)/1000);const t=cur.temp==null?null:cur.temp;sx.series.push(t);sx.opsS.push(sx.ops);sx.ops=0;sx.fpsS.push(sx.frames);sx.frames=0;if(t!=null)sx.max=Math.max(sx.max,t);
+  $('#sxEl').textContent=el+' / '+sx.dur+' s';$('#sxLoad').textContent=cur.cpu!=null?cur.cpu.toFixed(0)+'%':'—';$('#sxTemp').textContent=t==null?'N/A':t.toFixed(0)+'°C';$('#sxMaxT').textContent=sx.max?sx.max.toFixed(0)+'°C':'—';$('#sxFps').textContent=sx.mode==='cpu'?'—':sx.fpsS[sx.fpsS.length-1];
+  graph($('#gSx'),[sx.series.slice(-MAXP)],110);
+  if(t!=null&&t>=sx.lim){sxStop('SAFETY STOP — '+t.toFixed(0)+' °C REACHED',true);return}
+  if(el>=sx.dur)sxStop('COMPLETED'+(noTemp?' (NO TEMPERATURE SENSOR — 60 s CAP)':''),false)},1000)}
+function sxStop(reason,hot){if(!sx.run)return;sx.run=false;clearInterval(sx.iv);cancelAnimationFrame(sx.raf);sx.w.forEach(w=>w.terminate());sx.w=[];$('#sxGl').style.display='none';$('#sxGo').disabled=false;want.stress=false;syncLive();
+ const av=(a,f,t)=>{const x=a.slice(f,t);return x.length?x.reduce((p,q)=>p+q,0)/x.length:0};
+ const n=sx.opsS.length,oh=av(sx.opsS,1,6),ot=av(sx.opsS,Math.max(6,n-5),n),drop=oh>0&&n>12?Math.max(0,(1-ot/oh)*100):null;
+ const fh=av(sx.fpsS,1,6),ft=av(sx.fpsS,Math.max(6,n-5),n),fd=fh>0&&n>12?Math.max(0,(1-ft/fh)*100):null;
+ const worst=Math.max(drop||0,fd||0),verdict=hot?'THERMAL LIMIT HIT':worst>25||sx.max>=90?'THROTTLING — COOLING MAY BE POOR':worst>10||sx.max>=80?'WARM — ACCEPTABLE':n<12?'TOO SHORT TO JUDGE':'STABLE — COOLING IS FINE';
+ const rows=[['Result',reason],['Verdict',verdict],['Duration',n+' s'],['Max temperature',sx.max?sx.max.toFixed(0)+' °C':'N/A'],['CPU speed drop',drop==null?'—':drop.toFixed(0)+' %'],['GPU FPS drop',fd==null?'—':fd.toFixed(0)+' %'],['GPU FPS (avg)',sx.mode==='cpu'?'—':av(sx.fpsS,0,n).toFixed(0)]];
+ $('#sxRes').innerHTML=`<div class="verdict">${esc(verdict)}</div><table class="kv">${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</table>`;
+ if(n>5)saveHist('stress',rows)}
+$('#sxGo').onclick=sxStart;$('#sxStop').onclick=()=>sxStop('STOPPED BY YOU',false);
+
+// ---- battery ----
+const BATM=['Initializing battery scanner','Reading battery controller','Reading design capacity','Reading full-charge capacity','Reading cycle count','Measuring power flow','Calculating wear','Compiling report'];
+const BST={1:'Discharging',2:'On AC power',3:'Fully charged',4:'Low',5:'Critical',6:'Charging',7:'Charging',8:'Charging',9:'Charging',11:'Partly charged'};
+async function batScan(){const box=$('#batOut'),r=await lockScan(box,'BATTERY SCAN',BATM,call('battery'));if(!r)return;if(r.e){box.innerHTML=fail(r.e);return}
+ const d=r.v;if(!d||!d.present){box.innerHTML='<div class="empty">NO BATTERY DETECTED<br><small>THIS IS PROBABLY A DESKTOP PC</small></div>';return}
+ const des=d.design||0,full=d.full||0,h=des&&full?full/des*100:null,wear=h==null?null:Math.max(0,100-h),wh=v=>v?(v/1000).toFixed(1)+' Wh':'—';
+ const grade=h==null?'CAPACITY NOT REPORTED BY THIS BATTERY':h>=85?'EXCELLENT — LIKE NEW':h>=70?'GOOD':h>=50?'FAIR — PLAN A REPLACEMENT':'POOR — REPLACE SOON';
+ const flow=d.chargeRate>0?'+'+(d.chargeRate/1000).toFixed(1)+' W':d.dischargeRate>0?'−'+(d.dischargeRate/1000).toFixed(1)+' W':'—';
+ const rows=[['Health',h==null?'—':h.toFixed(0)+'%'],['Wear',wear==null?'—':wear.toFixed(0)+'%'],['Design capacity',wh(des)],['Full charge capacity',wh(full)],['Cycle count',d.cycles>0?String(d.cycles):'—'],['Charge now',d.charge!=null?d.charge+'%':'—'],['Power flow',flow],['Status',BST[d.status]||'—'],['Manufacturer',d.maker||'—']];
+ box.innerHTML=`<div class="verdict">${grade}</div><div class="stats">${rows.slice(0,8).map(r=>`<div class="stat"><b>${esc(r[1])}</b><span>${esc(r[0])}</span></div>`).join('')}</div><h2>Capacity</h2><p>Design: ${wh(des)}</p><div class="bar"><i style="width:100%"></i></div><p>Now: ${wh(full)}</p><div class="bar"><i style="width:${Math.min(100,h||0)}%"></i></div><p>Health is full-charge capacity divided by design capacity. Below about 70% you will notice shorter battery life.</p>`;
+ saveHist('battery',rows)}
+$('#batGo').onclick=batScan;enter.battery=()=>{if(!$('#batOut').querySelector('.stats,.ld')&&!busy)batScan()};
+
+// ---- disk health ----
+const DKM=['Initializing disk scanner','Detecting physical disks','Reading health status','Reading SMART counters','Reading temperature','Reading power-on hours','Estimating remaining life','Compiling report'];
+async function dkScan(){const box=$('#dkOut'),r=await lockScan(box,'DISK HEALTH SCAN',DKM,call('disk'));if(!r)return;if(r.e){box.innerHTML=fail(r.e);return}
+ const disks=A(r.v&&r.v.disks),adm=r.v&&r.v.admin;if(!disks.length){box.innerHTML='<div class="empty">NO DISKS FOUND</div>';return}
+ const rows=[];let missing=false;
+ const html=disks.map(d=>{const has=d.temp!=null||d.wear!=null||d.hours!=null;if(!has)missing=true;
+  const life=d.wear!=null?Math.max(0,100-d.wear):null,errs=(d.rerr||0)+(d.werr||0);
+  const bad=d.health&&d.health!=='Healthy',warn=(d.wear!=null&&d.wear>=50)||(d.temp!=null&&d.temp>=60)||errs>0;
+  const grade=bad?'✗ UNHEALTHY — BACK UP NOW':warn?'! WARNING — KEEP AN EYE ON IT':'✓ HEALTHY';
+  const days=d.hours!=null?Math.round(d.hours/24):null,gbs=Math.round(d.size/1073741824);
+  const r1=[['Status',d.health||'—'],['Type',J(d.media,d.bus)],['Capacity',gbs+' GB'],['Temperature',d.temp!=null?d.temp+' °C':'—'],['Power-on time',d.hours!=null?d.hours+' h (~'+days+' days)':'—'],['Wear',d.wear!=null?d.wear+' %':'—'],['Remaining life',life!=null?life+' %':'—'],['Read / write errors',d.rerr!=null?(d.rerr||0)+' / '+(d.werr||0):'—']];
+  r1.forEach(x=>rows.push([d.name+' › '+x[0],x[1]]));
+  return `<div class="dk"><h3>${esc(d.name)}</h3><div class="verdict" style="margin-top:0">${grade}</div><table class="kv">${r1.map(x=>`<tr><td>${esc(x[0])}</td><td>${esc(x[1])}</td></tr>`).join('')}</table>${life!=null?`<p>Remaining life</p><div class="bar"><i style="width:${life}%"></i></div>`:''}</div>`}).join('');
+ box.innerHTML=html+(missing&&!adm?'<p>Some SMART details (temperature, wear, hours) are hidden because DiagOne is not running as administrator. Press “Run as administrator”.</p>':'');
+ saveHist('disk',rows)}
+$('#dkGo').onclick=dkScan;enter.disk=()=>{if(!$('#dkOut').querySelector('.dk,.ld')&&!busy)dkScan()};
+
+// ---- windows health check ----
+const HLM=['Initializing health check','Searching for Windows updates','Checking pending restart','Checking firewall profiles','Checking antivirus','Checking Defender protection','Checking disk space','Compiling report'];
+function hlCompute(d){const it=[];
+ if(d.pending==null)it.push(['warn','Windows Update','Could not check for updates (offline or service busy).']);
+ else it.push([d.pending===0?'ok':'warn','Windows Update',d.pending===0?'No pending updates':d.pending+' pending: '+A(d.pendingTitles).join(' · ')]);
+ it.push([d.reboot?'warn':'ok','Restart required',d.reboot?'A restart is pending to finish updates.':'No restart pending']);
+ it.push([d.lastUpdate?'ok':'warn','Last update installed',d.lastUpdate?d.lastUpdate+' ('+(d.lastKb||'')+')':'Unknown']);
+ const fw=A(d.firewall),off=fw.filter(f=>!f.enabled);
+ it.push([!fw.length?'warn':off.length?'bad':'ok','Firewall',!fw.length?'Could not read firewall state':off.length?'OFF for: '+off.map(f=>f.name).join(', '):'ON for all profiles ('+fw.map(f=>f.name).join(', ')+')']);
+ const av=A(d.av),avOn=av.filter(a=>a.on);
+ it.push([avOn.length?(avOn.some(a=>a.upToDate)?'ok':'warn'):'bad','Antivirus',av.length?av.map(a=>a.name+(a.on?' (on':' (OFF')+(a.on&&!a.upToDate?', outdated':'')+')').join(' · '):'No antivirus found']);
+ if(d.defender)it.push([d.defender.rtp?'ok':(avOn.length?'ok':'bad'),'Defender real-time protection',d.defender.rtp?'ON — signatures '+d.defender.sigAge+' day(s) old':'OFF'+(avOn.length?' (another antivirus is active)':'')]);
+ A(d.disks).forEach(k=>{const p=k.free/k.size*100;it.push([p<8?'bad':p<15?'warn':'ok','Disk space '+k.id,p.toFixed(0)+'% free ('+gb(k.free)+' of '+gb(k.size)+')'])});
+ const bad=it.filter(i=>i[0]==='bad').length,warn=it.filter(i=>i[0]==='warn').length,score=Math.max(0,100-bad*25-warn*8);return {it,bad,warn,score}}
+async function hlScan(){const box=$('#hlOut'),r=await lockScan(box,'HEALTH CHECK',HLM,call('health'));if(!r)return;if(r.e){box.innerHTML=fail(r.e);return}
+ const d=r.v||{},{it,bad,warn,score}=hlCompute(d);
+ box.innerHTML=`<div class="verdict">HEALTH SCORE ${score}/100 — ${bad?bad+' PROBLEM(S)':warn?warn+' WARNING(S)':'ALL GOOD'}</div>`+it.map(i=>hr(i[0],i[1],i[2])).join('')+`<p>${esc(d.os||'')} build ${esc(d.build||'')}${d.admin?'':' · run as administrator for deeper checks'}</p>`;
+ saveHist('health',[['Score',String(score)]].concat(it.map(i=>[i[1],(i[0]==='ok'?'OK — ':i[0]==='warn'?'WARNING — ':'PROBLEM — ')+i[2]])))}
+$('#hlGo').onclick=hlScan;
+
+// ---- startup apps ----
+const SUM=['Initializing startup scanner','Reading startup registry keys','Reading startup folders','Checking enabled state','Matching running processes','Measuring resource use','Reading last boot time','Compiling report'];
+async function suScan(){const box=$('#suOut'),r=await lockScan(box,'STARTUP SCAN',SUM,call('startup'));if(!r)return;if(r.e){box.innerHTML=fail(r.e);return}
+ const items=A(r.v&&r.v.items).filter(Boolean).map(i=>Object.assign({},i,{imp:!i.running?'NOT RUNNING':(i.ramMB>=200||i.cpuSec>=60)?'HIGH':(i.ramMB>=80||i.cpuSec>=20)?'MEDIUM':'LOW'}));
+ const rank={HIGH:0,MEDIUM:1,LOW:2,'NOT RUNNING':3};items.sort((a,b)=>(b.enabled-a.enabled)||rank[a.imp]-rank[b.imp]);
+ const boot=r.v&&r.v.bootMs;
+ box.innerHTML=`<div class="stats"><div class="stat"><b>${items.length}</b><span>Startup items</span></div><div class="stat"><b>${items.filter(i=>i.enabled).length}</b><span>Enabled</span></div><div class="stat"><b>${items.filter(i=>i.enabled&&i.imp==='HIGH').length}</b><span>High impact</span></div><div class="stat"><b>${boot?(boot/1000).toFixed(0)+' s':'—'}</b><span>Last boot time</span></div></div>
+ <table class="kv"><tr><th>Program</th><th>State</th><th>Using now</th><th>Impact</th></tr>${items.map(i=>`<tr><td>${esc(i.name)}<br><small style="color:var(--dim);letter-spacing:0">${esc(i.location)}</small></td><td>${i.enabled?'ENABLED':'DISABLED'}</td><td>${i.running?i.ramMB+' MB · '+i.cpuSec+' s CPU':'—'}</td><td>${i.imp}</td></tr>`).join('')}</table>
+ <p>Impact is estimated from the memory and CPU time each program uses right now. To turn one off, use Task Manager (Startup tab) or Windows startup settings.</p>`}
+$('#suGo').onclick=suScan;$('#suTm').onclick=()=>call('open2','taskmgr').catch(()=>{});$('#suSet').onclick=()=>call('open2','startupsettings').catch(()=>{});
+enter.startup=()=>{if(!$('#suOut').querySelector('.kv,.ld')&&!busy)suScan()};
+
+// ---- network details ----
+const NTM=['Initializing network scanner','Reading adapters','Reading IP addresses','Reading DNS servers','Reading Wi-Fi signal','Looking up public IP','Pinging common servers','Compiling report'];
+async function ntScan(){const box=$('#ntOut'),r=await lockScan(box,'NETWORK SCAN',NTM,Promise.all([call('netinfo'),call('netping')]));if(!r)return;if(r.e){box.innerHTML=fail(r.e);return}
+ const info=r.v[0]||{},pings=A(r.v[1]),rows=[];let html='';
+ A(info.adapters).forEach(a=>{const kv=[['IPv4',a.ipv4],['IPv6',a.ipv6],['Gateway',a.gateway],['DNS servers',a.dns],['MAC',a.mac],['Link speed',a.speed]].filter(x=>x[1]);html+=`<h2>${esc(a.alias)} — ${esc(a.desc||'')}</h2><table class="kv">${kv.map(x=>`<tr><td>${esc(x[0])}</td><td>${esc(x[1])}</td></tr>`).join('')}</table>`;kv.forEach(x=>rows.push([a.alias+' › '+x[0],x[1]]))});
+ const w=info.wifi;if(w){const bars=Math.max(0,Math.min(5,Math.ceil((w.signal||0)/20))),kv=[['Network (SSID)',w.ssid],['Signal',(w.signal||0)+'%  '+'■'.repeat(bars)+'□'.repeat(5-bars)],['Radio',w.radio],['Band',w.band],['Channel',w.channel],['Receive / transmit',(w.rx||'?')+' / '+(w.tx||'?')+' Mbps'],['Security',w.auth]].filter(x=>x[1]);
+  html+=`<h2>Wi-Fi</h2><table class="kv">${kv.map(x=>`<tr><td>${esc(x[0])}</td><td>${esc(x[1])}</td></tr>`).join('')}</table>`;kv.forEach(x=>rows.push(['Wi-Fi › '+x[0],x[1]]))}
+ const p=info.pub;if(p){html+=`<h2>Public connection</h2><table class="kv"><tr><td>Public IP</td><td>${esc(p.ip||'—')}</td></tr><tr><td>Country</td><td>${esc(p.loc||'—')}</td></tr><tr><td>Nearest Cloudflare server</td><td>${esc(p.colo||'—')}</td></tr></table>`;rows.push(['Public IP',p.ip||'—'])}
+ html+=`<h2>Ping (TCP connect time)</h2><table class="kv"><tr><th>Server</th><th>Average</th><th>Min / max</th><th>Loss</th></tr>${pings.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.avg==null?'—':x.avg.toFixed(0)+' ms'}</td><td>${x.min==null?'—':x.min.toFixed(0)+' / '+x.max.toFixed(0)}</td><td>${x.loss}%</td></tr>`).join('')}</table>`;
+ pings.forEach(x=>rows.push(['Ping › '+x.name,x.avg==null?'failed':x.avg.toFixed(0)+' ms']));
+ box.innerHTML=html;box.classList.add('rev')}
+$('#ntGo').onclick=ntScan;enter.network=()=>{if(!$('#ntOut').querySelector('.kv,.ld')&&!busy)ntScan()};
+
+// ---- speed test ----
+const dlTest=async(secs,upd)=>{let bytes=0;const ac=new AbortController(),t0=performance.now();
+ const wk=async()=>{try{while(performance.now()-t0<secs*1000){const r=await fetch('https://speed.cloudflare.com/__down?bytes=25000000&r='+Math.random(),{cache:'no-store',signal:ac.signal}),rd=r.body.getReader();
+  for(;;){const x=await rd.read();if(x.done)break;bytes+=x.value.length;if(performance.now()-t0>=secs*1000){ac.abort();return}}}}catch(e){}};
+ const iv=setInterval(()=>upd(bytes*8/1e6/((performance.now()-t0)/1000)),200);await Promise.all([wk(),wk(),wk()]);clearInterval(iv);return bytes*8/1e6/((performance.now()-t0)/1000)};
+const ulTest=(secs,upd)=>new Promise(res=>{let bytes=0,done=false;const t0=performance.now(),blob=new Blob([new Uint8Array(4e6)]),xs=[];
+ const one=()=>{if(done)return;const x=new XMLHttpRequest();let last=0;x.open('POST','https://speed.cloudflare.com/__up?r='+Math.random());x.upload.onprogress=e=>{bytes+=e.loaded-last;last=e.loaded};x.onloadend=one;xs.push(x);x.send(blob)};
+ for(let i=0;i<3;i++)one();const iv=setInterval(()=>{const m=bytes*8/1e6/((performance.now()-t0)/1000);upd(m);if(performance.now()-t0>=secs*1000){done=true;clearInterval(iv);xs.forEach(x=>x.abort());res(m)}},200)});
+async function spRun(){if(busy)return;busy=true;$('#spGo').disabled=true;const box=$('#spOut'),top=$('#topbar i');
+ box.innerHTML='<div class="ld"><div class="ld-top"><span id="spPh">LATENCY</span><span id="spT">T+00.0s</span></div><div class="ld-pct"><span id="spN">0</span> <span id="spU" style="font-size:.22em;letter-spacing:0">ms</span></div><div class="ld-bar"><i id="spBar"></i></div><div class="ld-log" id="spLog"></div></div>';
+ const t0=performance.now(),tm=setInterval(()=>{const e=$('#spT');if(e)e.textContent='T+'+((performance.now()-t0)/1000).toFixed(1).padStart(4,'0')+'s'},100);
+ const ph=(n,u,p)=>{$('#spPh').textContent=n;$('#spU').textContent=u;$('#spBar').style.width=p+'%';top.style.width=p+'%';const l=$('#spLog');if(l.lastChild)l.lastChild.textContent+=' [OK]';const d=document.createElement('div');d.textContent='> '+n+'…';l.appendChild(d)};
+ const show2=v=>{$('#spN').textContent=v<10?v.toFixed(1):Math.round(v)};
+ try{ph('MEASURING LATENCY','ms',5);const lat=[];for(let i=0;i<9;i++){const s0=performance.now();await fetch('https://speed.cloudflare.com/__down?bytes=0&r='+Math.random(),{cache:'no-store'});lat.push(performance.now()-s0);show2(lat[lat.length-1])}
+  lat.shift();const L=lat.reduce((a,b)=>a+b)/lat.length,Jt=lat.slice(1).reduce((a,v,i)=>a+Math.abs(v-lat[i]),0)/(lat.length-1);
+  ph('TESTING DOWNLOAD','Mbps',20);const dl=await dlTest(8,v=>{show2(v);$('#spBar').style.width=(20+Math.min(40,v/3))+'%'});
+  ph('TESTING UPLOAD','Mbps',65);const ul=await ulTest(6,v=>{show2(v);$('#spBar').style.width=(65+Math.min(30,v/3))+'%'});
+  $('#spLog').lastChild.textContent+=' [OK]';top.style.width='0';
+  const rows=[['Download',dl.toFixed(1)+' Mbps'],['Upload',ul.toFixed(1)+' Mbps'],['Latency',L.toFixed(0)+' ms'],['Jitter',Jt.toFixed(0)+' ms']];
+  box.innerHTML=`<div class="stats">${rows.map(r=>`<div class="stat"><b>${r[1]}</b><span>${r[0]}</span></div>`).join('')}</div><div class="verdict">${dl>=100?'FAST — GREAT FOR 4K, GAMING AND LARGE DOWNLOADS':dl>=25?'GOOD — FINE FOR HD VIDEO, CALLS AND GAMING':dl>=5?'SLOW — OK FOR BROWSING AND SD VIDEO':'VERY SLOW'}</div><p>Test server: Cloudflare. Results vary with Wi-Fi signal and other devices on your network.</p>`;
+  saveHist('speed',rows)}
+ catch(e){top.style.width='0';box.innerHTML='<div class="empty">TEST FAILED<br><small>CHECK YOUR INTERNET CONNECTION</small></div>'}
+ clearInterval(tm);busy=false;$('#spGo').disabled=false}
+$('#spGo').onclick=spRun;
+
+// ---- dashboard + check-up ----
+const gname=g=>g;
+function renderHome(){let i=0;
+ $('#homeCards').innerHTML=GROUPS.filter(g=>g[0]!=='Overview').map(g=>`<h2>${gname(g[0])}</h2><div class="cards">${g[1].map(t=>`<button class="card" data-go="${t}" style="animation:rowin .45s both;animation-delay:${(i++)*28}ms">${svg(t)}<b>${TABEN[t]}</b><em>${DESC[t]}</em></button>`).join('')}</div>`).join('');
+ $('#homeRecent').innerHTML=hist.length?hist.slice(0,6).map(h=>`<div class="hist"><span>${esc(HT[h.type]||h.type)}${h.label?' — '+esc(h.label):''}<small>${esc(new Date(h.date).toLocaleString(LOC()))}</small></span><button data-go="history">Open</button></div>`).join(''):'<div class="empty">NO SCANS YET<br><small>RUN A CHECK-UP TO GET STARTED</small></div>'}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)show(b.dataset.go)});
+enter.home=renderHome;
+const CUM=['Initializing check-up','Reading system specs','Checking Windows health','Reading battery health','Reading disk health','Reading startup programs','Analyzing results','Compiling check-up report'];
+async function checkup(){const box=$('#cuOut');
+ const r=await lockScan(box,'FULL CHECK-UP',CUM,sys?Promise.allSettled([sys.info(),call('health'),call('battery'),call('disk'),call('startup')]):Promise.reject(new Error('desktop app only')));if(!r)return;if(r.e){box.innerHTML=fail(r.e);return}
+ const v=r.v.map(x=>x.status==='fulfilled'?x.value:null),inf=v[0],hl=v[1],bat=v[2],dsk=v[3],st=v[4],rows=[];
+ if(inf){const cs=inf.cs||{},o=inf.os||{},cp=A(inf.cpu)[0]||{};rows.push(['ok','Computer',J(cs.Manufacturer,cs.Model)+' · '+(o.Caption||'')+' · '+(cp.Name||'')+' · '+gb(cs.TotalPhysicalMemory)+' RAM','system'])}else rows.push(['warn','Computer','Could not read system specs','system']);
+ if(hl){const c=hlCompute(hl);rows.push([c.bad?'bad':c.warn?'warn':'ok','Windows health','Score '+c.score+'/100 · '+c.bad+' problem(s), '+c.warn+' warning(s)','health'])}else rows.push(['warn','Windows health','Check failed','health']);
+ if(bat){if(!bat.present)rows.push(['ok','Battery','No battery (desktop PC)','battery']);else{const h=bat.design&&bat.full?bat.full/bat.design*100:null;rows.push([h==null?'warn':h>=70?'ok':h>=50?'warn':'bad','Battery',h==null?'Capacity not reported':'Health '+h.toFixed(0)+'%'+(bat.cycles>0?' · '+bat.cycles+' cycles':''),'battery'])}}else rows.push(['warn','Battery','Check failed','battery']);
+ if(dsk){const ds=A(dsk.disks),bd=ds.some(d=>d.health&&d.health!=='Healthy'),wn=ds.some(d=>(d.wear!=null&&d.wear>=50)||(d.temp!=null&&d.temp>=60));rows.push([bd?'bad':wn?'warn':'ok','Disks',ds.length+' disk(s): '+ds.map(d=>d.name+' — '+(d.health||'?')).join(' · '),'disk'])}else rows.push(['warn','Disks','Check failed','disk']);
+ if(st){const it=A(st.items).filter(Boolean),en=it.filter(i=>i.enabled),hi=en.filter(i=>i.running&&(i.ramMB>=200||i.cpuSec>=60)).length;rows.push([hi>=3?'warn':'ok','Startup programs',en.length+' enabled · '+hi+' high impact'+(st.bootMs?' · last boot '+(st.bootMs/1000).toFixed(0)+' s':''),'startup'])}else rows.push(['warn','Startup programs','Check failed','startup']);
+ const bad=rows.filter(x=>x[0]==='bad').length,warn=rows.filter(x=>x[0]==='warn').length;
+ box.innerHTML=`<div class="verdict">${bad?bad+' PROBLEM(S) FOUND':warn?warn+' ITEM(S) NEED ATTENTION':'EVERYTHING LOOKS GOOD'}</div>`+rows.map(x=>`<div class="hrow"><div><b>${esc(x[1])}</b><small>${esc(x[2])}</small></div><div class="cuact"><b>${x[0]==='ok'?'✓':x[0]==='warn'?'!':'✗'}</b><button data-go="${x[3]}">Open</button></div></div>`).join('')+'<p>This report was saved to History.</p>';
+ saveHist('checkup',rows.map(x=>[x[1],(x[0]==='ok'?'OK — ':x[0]==='warn'?'WARNING — ':'PROBLEM — ')+x[2]]))}
+$('#cuGo').onclick=checkup;
+
+// ---- sidebar: search, collapse, shortcuts ----
+let curTab='home';function setHead(t){curTab=t;$('#pgTitle').textContent=TABEN[t];$('#crumb').textContent=GN[t]||'';$('#pgDesc').textContent=DESC[t]||'';scrollTo(0,0)}
+const nq=$('#navQ');
+nq.oninput=()=>{const q=nq.value.trim().toLowerCase();let g=null;const any=new Map();
+ $$('#nav > *').forEach(el=>{if(el.classList.contains('ng')){g=el;any.set(el,false);return}const t=el.dataset.tab,ok=!q||tabLabel(t).toLowerCase().includes(q)||t.includes(q)||(DESC[t]||'').toLowerCase().includes(q);el.style.display=ok?'':'none';if(ok)any.set(g,true)});
+ any.forEach((v,k)=>k.style.display=v?'':'none')};
+nq.onkeydown=e=>{if(e.key==='Enter'){const q=nq.value.trim().toLowerCase(),vis=$$('#nav .ni').filter(b=>b.style.display!=='none'),lb=b=>tabLabel(b.dataset.tab).toLowerCase(),f=vis.find(b=>lb(b).startsWith(q))||vis.find(b=>lb(b).includes(q))||vis[0];if(f)f.click();nq.value='';nq.oninput();nq.blur()}else if(e.key==='Escape'){nq.value='';nq.oninput();nq.blur()}};
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();e.stopImmediatePropagation();if(document.body.classList.contains('sc'))document.body.classList.remove('sc');nq.focus();nq.select()}},true);
+$('#collapse').onclick=()=>{document.body.classList.toggle('sc');try{localStorage.setItem('dg_sc',document.body.classList.contains('sc')?'1':'')}catch(e){}};
+try{if(localStorage.getItem('dg_sc'))document.body.classList.add('sc')}catch(e){}
+
+// ---- hook into tab switching ----
+const _show=show;
+show=function(t){if(t!=='live'&&want.live){want.live=false;syncLive()}if(t!=='stress'&&sx.run)sxStop('STOPPED — LEFT THE TAB',false);_show(t);setHead(t);enter[t]&&enter[t]()};
+// language selector
+const lb=$('#langBtn'),lm=$('#langMenu');
+const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)};
+function buildMenu(){lm.innerHTML=Object.keys(LANGS).map(k=>`<button class="lo${k===lang?' on':''}" role="option" aria-selected="${k===lang}" data-l="${k}"><i>${LANGS[k][0]}</i><span>${LANGS[k][1]}<small>${LANGS[k][2]}</small></span>${k===lang?'<b class="ck">✓</b>':''}</button>`).join('');$('#langCode').textContent=LANGS[lang][0]}
+function openMenu(o){lm.hidden=!o;lb.setAttribute('aria-expanded',String(o));if(o)(lm.querySelector('.on')||lm.firstChild).focus()}
+function setLang(c){lang=c;try{localStorage.setItem('dg_lang',c)}catch(e){}document.documentElement.lang=c;
+ setHead(curTab);if(curTab==='home')renderHome();if(curTab==='history')renderHist();clk();translateAll();
+ const sh=$('#shell');sh.classList.remove('lf');void sh.offsetWidth;sh.classList.add('lf');buildMenu();toast(tr('Language')+': '+LANGS[c][1])}
+lb.onclick=e=>{e.stopPropagation();openMenu(lm.hidden)};
+document.addEventListener('click',e=>{if(!e.target.closest('#lg')&&!lm.hidden)openMenu(false)});
+lm.onclick=e=>{const b=e.target.closest('.lo');if(!b)return;setLang(b.dataset.l);openMenu(false);lb.focus()};
+lm.onkeydown=e=>{const it=[...lm.querySelectorAll('.lo')],i=it.indexOf(document.activeElement);
+ if(e.key==='ArrowDown'){e.preventDefault();it[(i+1)%it.length].focus()}else if(e.key==='ArrowUp'){e.preventDefault();it[(i-1+it.length)%it.length].focus()}else if(e.key==='Escape'){openMenu(false);lb.focus()}};
+buildMenu();
+})();
+
+// ===================== BOOT SCREEN =====================
+(function(){const b=$('#boot'),pct=$('#btP'),bar=$('#btBar'),log=$('#btLog');
+ const M=['Initializing DiagOne core','Loading hardware tests','Mounting live monitor','Calibrating diagnostics','Native bridge: '+(window.sys?'ONLINE':'WEB MODE'),'System ready'];
+ let seen=false;try{seen=!!localStorage.getItem('dg_seen');localStorage.setItem('dg_seen','1')}catch(e){}
+ if(seen)b.classList.add('fast');
+ const dur=REDUCED?400:(seen?800:2300),t0=performance.now();let li=-1,fin=false;
+ const out=()=>{if(fin)return;fin=true;b.classList.add('out');setTimeout(()=>b.remove(),450)};
+ const skip=()=>{if(performance.now()-t0>250)out()};b.onclick=skip;addEventListener('keydown',skip,{once:true});
+ const tick=()=>{if(fin)return;const t=Math.min(1,(performance.now()-t0)/dur),e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2,p=Math.floor(e*100);
+  pct.textContent=p;bar.style.width=p+'%';const n=Math.min(M.length-1,Math.floor(e*M.length));
+  while(li<n){li++;if(log.lastChild)log.lastChild.textContent+=' [OK]';const d=document.createElement('div');d.textContent='> '+M[li];log.appendChild(d);while(log.children.length>3)log.removeChild(log.firstChild)}
+  if(t<1)requestAnimationFrame(tick);else{pct.textContent=100;bar.style.width='100%';b.classList.add('ready');setTimeout(out,REDUCED?0:(seen?120:450))}};
+ requestAnimationFrame(tick)})();
+applyLang();
+show('home');
+</script></body></html>
